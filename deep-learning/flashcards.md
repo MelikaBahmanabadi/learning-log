@@ -6,68 +6,65 @@
 
 ## W1 — What is a Neural Network?
 
-ReLU مخفف چیه و فرمولش چیه؟ ; Rectified Linear Unit — max(0, z). اگه ورودی منفی باشه صفر، وگرنه خودش.
+What does ReLU stand for and what is its formula? ; Rectified Linear Unit — max(0, z). Output is zero for negative input, otherwise the input itself.
 
-چرا بدون non-linearity، stack کردن چند لایه بی‌فایده‌ست؟ ; چون W2(W1x) = (W2W1)x = W3x — ضرب ماتریس‌ها ادغام میشن و کل شبکه معادل یه لایه‌ی خطی میشه. خطی فقط hyperplane می‌کشه، نه توابع پیچیده.
+Why is stacking multiple layers useless without non-linearity? ; Because W2(W1x) = (W2W1)x = W3x — the matrices collapse into one. The whole network becomes equivalent to a single linear layer, which can only draw hyperplanes, not complex functions.
 
-یه hidden layer با n نورون که به m ورودی densely connected باشه، چند وزن داره؟ (بدون bias) ; m × n
+How many weights does a hidden layer with n neurons densely connected to m inputs have? (no bias) ; m × n
 
-Dense (fully connected) layer یعنی چی؟ ; هر نورون لایه‌ی قبل به تمام نورون‌های لایه‌ی بعد وصله — شبکه آزاده هر ترکیبی از ورودی‌ها رو یاد بگیره.
+What does a Dense (fully connected) layer mean? ; Every neuron from the previous layer connects to every neuron in the next — the network is free to learn any combination of inputs.
 
-چرا hidden layer به این اسم خوانده میشه؟ ; چون مقادیرش در training data برچسب مستقیم ندارن — برعکس input و output که مشخص هستن.
+Why is a hidden layer called "hidden"? ; Because its values have no direct labels in the training data — unlike input and output which are explicitly known.
 
 ---
 
 ## W1 — Supervised Learning with Neural Networks
 
-کدوم معماری برای کدوم داده؟ ; Standard NN → tabular/structured | CNN → spatial patterns (image, signal) | RNN/LSTM → sequential/temporal (audio, time-series, text) | Hybrid → complex mixed (autonomous driving)
+Which architecture for which data type? ; Standard NN → tabular/structured | CNN → spatial patterns (image, signal) | RNN/LSTM → sequential/temporal (audio, time-series, text) | Hybrid → complex mixed (autonomous driving)
 
-چهار learning paradigm اصلی کدومن؟ ; Supervised (labeled), Unsupervised (no label), Semi-supervised (few labeled + many unlabeled), Reinforcement (reward signal)
+What are the four main learning paradigms? ; Supervised (labeled), Unsupervised (no label), Semi-supervised (few labeled + many unlabeled), Reinforcement (reward signal)
 
-تفاوت Learning Paradigm با Task Type چیه؟ ; Paradigm = نوع داده‌ی آموزشی (supervised/unsupervised/...) | Task = نوع خروجی (classification/regression/clustering/...). رگرسیون یه task هست که درون supervised قرار می‌گیره، نه یه paradigm.
+What is the difference between a Learning Paradigm and a Task Type? ; Paradigm = type of training data (supervised/unsupervised/...) | Task = type of output (classification/regression/clustering/...). Regression is a task that falls inside supervised learning, not a paradigm itself.
 
-چرا RNN برای time-series سنسور صنعتی بهتر از Standard NN هست؟ ; چون وابستگی زمانی دارن — قدم t به قدم t-1 مرتبطه (Markov chain). Standard NN هر ورودی رو مستقل می‌بینه.
+Why is RNN better than Standard NN for industrial sensor time-series? ; Because of temporal dependencies — step t depends on step t-1 (Markov chain). Standard NN treats each input independently.
 
-Structured vs Unstructured data فرق اصلیشون چیه؟ ; Structured = هر feature معنی مشخص داره (جدول، سنسور با timestamp) | Unstructured = معنی از الگوهای خام استخراج میشه (تصویر، صدا، متن آزاد)
+What is the core difference between Structured and Unstructured data? ; Structured = each feature has explicit meaning (table, sensor with timestamp) | Unstructured = meaning is extracted from raw patterns (image, audio, free text)
 
 ---
 
 ## W1 — Why is Deep Learning Taking Off?
 
-[Deep Learning][Neural Networks and Deep Learning][W1-04-Why-is-Deep-Learning-taking-off] سه عامل اصلی رشد Deep Learning چیست؟ ; 1) داده‌ی بیشتر و برچسب‌دار، 2) محاسبات سریع‌تر و سخت‌افزارهایی مانند GPU، 3) نوآوری الگوریتمی و معماری.
+What are the three main drivers of Deep Learning growth? ; 1) More labeled data, 2) Faster computation and hardware like GPUs, 3) Algorithmic and architectural innovations.
 
-[Deep Learning][Neural Networks and Deep Learning][W1-04-Why-is-Deep-Learning-taking-off] m در notation این دوره چه معنایی دارد؟ ; تعداد training examples؛ در supervised learning معمولاً تعداد نمونه‌های labeled که هم x و هم y دارند.
+What does m represent in this course's notation? ; The number of training examples; in supervised learning, typically the count of labeled samples that have both x and y.
 
-[Deep Learning][Neural Networks and Deep Learning][W1-04-Why-is-Deep-Learning-taking-off] چرا Sigmoid در شبکه‌های عمیق می‌تواند باعث vanishing gradient شود؟ ; در نواحی اشباع، مشتق Sigmoid نزدیک صفر می‌شود؛ در backpropagation ضرب پی‌درپی این گرادیان‌های کوچک، گرادیان لایه‌های ابتدایی را تقریباً صفر می‌کند.
+Why can Sigmoid cause vanishing gradient in deep networks? ; In saturation regions, the Sigmoid derivative approaches zero; repeated multiplication of these small gradients during backpropagation makes early-layer gradients nearly zero.
 
-[Deep Learning][Neural Networks and Deep Learning][W1-04-Why-is-Deep-Learning-taking-off] مشتق ReLU در چه ناحیه‌هایی صفر و یک است؟ ; برای z < 0 برابر 0 و برای z > 0 برابر 1 است؛ در z = 0 مشتق معمولاً در پیاده‌سازی با یک convention تعیین می‌شود.
+In which regions is the ReLU derivative zero vs one? ; Zero for z < 0 and one for z > 0; at z = 0, the derivative is set by convention in most implementations.
 
-[Deep Learning][Neural Networks and Deep Learning][W1-04-Why-is-Deep-Learning-taking-off] چرا سرعت محاسبات برای موفقیت Deep Learning مهم است؟ ; چرخه‌ی idea → code → experiment → result → iteration را کوتاه می‌کند، بنابراین می‌توان experiment و iteration بیشتری انجام داد و سریع‌تر به مدل مؤثر رسید.
+Why does computation speed matter for Deep Learning success? ; It shortens the idea → code → experiment → result → iteration cycle, allowing more experiments and faster convergence to effective models.
 
 ---
 
 ## W2 — Basics of Neural Network Programming
 
-[Deep Learning][Neural Networks and Deep Learning][W2-01-Binary-Classification]
-چرا در پیاده‌سازی شبکه‌های عصبی از حلقه‌های for صریح (explicit) روی کل مجموعه آموزشی استفاده نمی‌کنیم؟ ; چون عملیات ماتریسی و برداری (vectorized) بسیار بهینه‌تر، تمیزتر و برای محاسبات سنگین شبکه عصبی سریع‌تر هستند.
+Why do we avoid explicit for-loops over the full training set in neural network implementations? ; Because vectorized matrix operations are far more efficient, cleaner, and faster for heavy neural network computations.
 
-[Deep Learning][Neural Networks and Deep Learning][W2-01-Binary-Classification]
-یک تصویر RGB با ابعاد 64x64 چگونه به یک بردار ویژگی (feature vector) تبدیل می‌شود؟ ; با باز کردن (unrolling) تمام مقادیر پیکسلی هر سه کانال رنگی در یک بردار بلند به طول 12288 = 3 * 64 * 64.
+How is a 64x64 RGB image converted to a feature vector? ; By unrolling all pixel values from each of the three color channels into a single long vector of length 12288 = 3 × 64 × 64.
 
-[Deep Learning][Neural Networks and Deep Learning][W2-01-Binary-Classification]
-در نمادگذاری این دوره، ماتریس X نشان‌دهنده چیست و چه ابعادی دارد؟ ; ماتریس ورودی‌ها که از چیدن ستونی نمونه‌های آموزشی ساخته شده و ابعاد آن (n_x, m) است.
+What does matrix X represent in this course's notation and what are its dimensions? ; The input matrix formed by stacking training samples as columns; dimensions are (n_x, m).
 
-[Deep Learning][Neural Networks and Deep Learning][W2-01-Binary-Classification]
-در نمادگذاری این دوره، ماتریس Y نشان‌دهنده چیست و چه ابعادی دارد؟ ; ماتریس برچسب‌ها (labels) که از چیدن ستونی خروجی‌ها ساخته شده و ابعاد آن (1, m) است.
+What does matrix Y represent in this course's notation and what are its dimensions? ; The label matrix formed by stacking outputs as columns; dimensions are (1, m).
 
-[Deep Learning][Neural Networks and Deep Learning][W2-02-Logistic-Regression] مقدار y-hat در رگرسیون لجستیک (Logistic Regression) نشان‌دهنده چیست؟ ; \(\hat{y} = P(y=1 \mid x)\)، یعنی احتمال اینکه با توجه به ویژگی‌های ورودی \(x\)، برچسب واقعی \(y\) برابر 1 باشد.
+What does y-hat represent in Logistic Regression? ; P(y=1|x) — the probability that given input features x, the true label y equals 1.
 
-[Deep Learning][Neural Networks and Deep Learning][W2-02-Logistic-Regression] چرا در رگرسیون لجستیک به تابع فعال‌ساز سیگموئید (Sigmoid) نیاز داریم؟ ; چون تابع سیگموئید هر عدد حقیقی را به بازه \((0,1)\) می‌برد و خروجی را به یک احتمال (Probability) معتبر تبدیل می‌کند.
+Why do we need the Sigmoid activation function in Logistic Regression? ; Because Sigmoid maps any real number to the interval (0,1), converting the output into a valid probability.
 
-[Deep Learning][Neural Networks and Deep Learning][W2-02-Logistic-Regression] چرا یک خروجی خطی به فرم \(w^T x + b\) برای طبقه‌بندی دودویی (Binary Classification) مناسب نیست؟ ; چون مقادیر خروجی خطی می‌تواند منفی یا بزرگ‌تر از 1 شود که به عنوان احتمال (Probability) قابل تفسیر نیست.
+Why is a linear output of the form w^T x + b unsuitable for binary classification? ; Because linear outputs can be negative or greater than 1, which cannot be interpreted as a probability.
 
-[Deep Learning][Neural Networks and Deep Learning][W2-02-Logistic-Regression] تعبیر احتمالی اصلی رگرسیون لجستیک چیست؟ ; مدل سعی می‌کند احتمال شرطی \(P(y=1 \mid x)\) را تخمین بزند، یعنی شانس اینکه ورودی \(x\) متعلق به کلاس مثبت باشد.
+What is the core probabilistic interpretation of Logistic Regression? ; The model tries to estimate the conditional probability P(y=1|x) — the chance that input x belongs to the positive class.
 
+---
 
 ## Needs Review
 <!-- Wrong answers from periodic quizzes go here -->
