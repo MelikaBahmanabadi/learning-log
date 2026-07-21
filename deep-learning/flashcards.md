@@ -46,5 +46,20 @@ Structured vs Unstructured data فرق اصلیشون چیه؟ ; Structured = ه
 
 ---
 
+### W2 — Basics of Neural Network Programming
+
+[Deep Learning][Neural Networks and Deep Learning][W2-01-Binary-Classification]
+چرا در پیاده‌سازی شبکه‌های عصبی از حلقه‌های for صریح (explicit) روی کل مجموعه آموزشی استفاده نمی‌کنیم؟ ; چون عملیات ماتریسی و برداری (vectorized) بسیار بهینه‌تر، تمیزتر و برای محاسبات سنگین شبکه عصبی سریع‌تر هستند.
+
+[Deep Learning][Neural Networks and Deep Learning][W2-01-Binary-Classification]
+یک تصویر RGB با ابعاد 64x64 چگونه به یک بردار ویژگی (feature vector) تبدیل می‌شود؟ ; با باز کردن (unrolling) تمام مقادیر پیکسلی هر سه کانال رنگی در یک بردار بلند به طول 12288 = 3 * 64 * 64.
+
+[Deep Learning][Neural Networks and Deep Learning][W2-01-Binary-Classification]
+در نمادگذاری این دوره، ماتریس X نشان‌دهنده چیست و چه ابعادی دارد؟ ; ماتریس ورودی‌ها که از چیدن ستونی نمونه‌های آموزشی ساخته شده و ابعاد آن (n_x, m) است.
+
+[Deep Learning][Neural Networks and Deep Learning][W2-01-Binary-Classification]
+در نمادگذاری این دوره، ماتریس Y نشان‌دهنده چیست و چه ابعادی دارد؟ ; ماتریس برچسب‌ها (labels) که از چیدن ستونی خروجی‌ها ساخته شده و ابعاد آن (1, m) است.
+
+
 ## Needs Review
 <!-- Wrong answers from periodic quizzes go here -->
