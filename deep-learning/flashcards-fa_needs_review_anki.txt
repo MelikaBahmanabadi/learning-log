@@ -1,0 +1,7 @@
+#separator:tab
+#html:true
+#notetype:Basic
+#deck:Deep Learning FA::Neural Networks and Deep Learning
+#tags column:3
+#columns:Front	Back	Tags
+
