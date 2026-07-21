@@ -1,0 +1,152 @@
+name: Anki Export — SQL
+
+on:
+  push:
+    paths:
+      - "sql/flashcards.md"
+      - "sql/flashcards-fa.md"
+      - "sql/progress.md"
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Generate Anki txt files (EN + FA)
+        run: |
+          python3 << 'EOF'
+          import re
+
+          SEP = '\t'
+
+          def wrap_ltr(text):
+              text = text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+              return f'<div dir="ltr" style="text-align:left;font-family:monospace,sans-serif">{text}</div>'
+
+          def wrap_rtl(text):
+              text = text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+              return f'<div dir="rtl" style="text-align:right;font-family:Tahoma,Arial,sans-serif">{text}</div>'
+
+          def parse_flashcards(filepath, wrap_fn, domain_tag, course_tag):
+              main_cards = []
+              review_cards = []
+              current_section_tag = 'general'
+              in_needs_review = False
+              try:
+                  with open(filepath, 'r', encoding='utf-8') as f:
+                      lines = f.readlines()
+              except FileNotFoundError:
+                  return main_cards, review_cards
+
+              for line in lines:
+                  stripped = line.strip()
+                  if stripped.startswith('## '):
+                      heading = stripped[3:].strip()
+                      if heading.lower().startswith('needs review'):
+                          in_needs_review = True
+                      else:
+                          in_needs_review = False
+                          current_section_tag = re.sub(r'[^\w\u0600-\u06FF]+', '_', heading).strip('_').lower()
+                      continue
+                  if ';' not in stripped:
+                      continue
+                  if stripped.startswith('#') or stripped.startswith('<!--') or stripped.startswith('---'):
+                      continue
+                  parts = stripped.split(';', 1)
+                  if len(parts) != 2:
+                      continue
+                  front = wrap_fn(parts[0].strip())
+                  back  = wrap_fn(parts[1].strip())
+                  tags  = f"domain::{domain_tag} course::{course_tag} section::{current_section_tag}"
+                  row   = SEP.join([front, back, tags])
+                  if in_needs_review:
+                      review_cards.append(row)
+                  else:
+                      main_cards.append(row)
+              return main_cards, review_cards
+
+          # ─── Read course name from progress.md ───────────────────────────
+          course_tag = 'sql_fundamentals'
+          raw_course = 'SQL Fundamentals'
+          try:
+              with open('sql/progress.md', 'r', encoding='utf-8') as pf:
+                  for line in pf:
+                      m = re.match(r'\*{0,2}Course:\*{0,2}\s*(.+)', line.strip())
+                      if m:
+                          raw_course = m.group(1).strip().split('|')[0].strip().rstrip('*').strip()
+                          course_tag = re.sub(r'[^\w\u0600-\u06FF]+', '_', raw_course).strip('_').lower()
+                          break
+          except FileNotFoundError:
+              pass
+
+          anki_header_en = (
+              "#separator:tab\n"
+              "#html:true\n"
+              "#notetype:Basic\n"
+              f"#deck:SQL::{raw_course}\n"
+              "#tags column:3\n"
+              "#columns:Front\tBack\tTags\n"
+          )
+
+          anki_header_fa = (
+              "#separator:tab\n"
+              "#html:true\n"
+              "#notetype:Basic\n"
+              f"#deck:SQL \u0641\u0627\u0631\u0633\u06cc::{raw_course}\n"
+              "#tags column:3\n"
+              "#columns:Front\tBack\tTags\n"
+          )
+
+          # ─── English deck ─────────────────────────────────────────────────
+          main_en, review_en = parse_flashcards('sql/flashcards.md', wrap_ltr, 'sql', course_tag)
+
+          with open('sql/flashcards_anki.txt', 'w', encoding='utf-8') as f:
+              f.write(anki_header_en)
+              f.write('\n'.join(main_en) + '\n')
+
+          with open('sql/flashcards_needs_review_anki.txt', 'w', encoding='utf-8') as f:
+              f.write(anki_header_en)
+              f.write('\n'.join(review_en) + '\n')
+
+          # ─── Persian deck ────────────────────────────────────────────────
+          main_fa, review_fa = parse_flashcards('sql/flashcards-fa.md', wrap_rtl, 'sql', course_tag)
+
+          with open('sql/flashcards-fa_anki.txt', 'w', encoding='utf-8') as f:
+              f.write(anki_header_fa)
+              f.write('\n'.join(main_fa) + '\n')
+
+          with open('sql/flashcards-fa_needs_review_anki.txt', 'w', encoding='utf-8') as f:
+              f.write(anki_header_fa)
+              f.write('\n'.join(review_fa) + '\n')
+
+          print(f'Course    : {raw_course}')
+          print(f'EN main   : {len(main_en)}')
+          print(f'EN review : {len(review_en)}')
+          print(f'FA main   : {len(main_fa)}')
+          print(f'FA review : {len(review_fa)}')
+          EOF
+
+      - name: Commit and push Anki exports
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add sql/flashcards_anki.txt sql/flashcards_needs_review_anki.txt \
+                    sql/flashcards-fa_anki.txt sql/flashcards-fa_needs_review_anki.txt
+            git commit -m "Update SQL Anki exports (EN + FA)"
+            git pull --rebase origin main
+            git push
+          else
+            echo "No changes in SQL Anki export files"
+          fi
