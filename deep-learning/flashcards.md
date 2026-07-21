@@ -32,7 +32,7 @@ Structured vs Unstructured data فرق اصلیشون چیه؟ ; Structured = ه
 
 ---
 
-## W1 — Why is Deep Learning Taking Off? (W1-04)
+## W1 — Why is Deep Learning Taking Off?
 
 [Deep Learning][Neural Networks and Deep Learning][W1-04-Why-is-Deep-Learning-taking-off] سه عامل اصلی رشد Deep Learning چیست؟ ; 1) داده‌ی بیشتر و برچسب‌دار، 2) محاسبات سریع‌تر و سخت‌افزارهایی مانند GPU، 3) نوآوری الگوریتمی و معماری.
 
@@ -46,7 +46,7 @@ Structured vs Unstructured data فرق اصلیشون چیه؟ ; Structured = ه
 
 ---
 
-### W2 — Basics of Neural Network Programming
+## W2 — Basics of Neural Network Programming
 
 [Deep Learning][Neural Networks and Deep Learning][W2-01-Binary-Classification]
 چرا در پیاده‌سازی شبکه‌های عصبی از حلقه‌های for صریح (explicit) روی کل مجموعه آموزشی استفاده نمی‌کنیم؟ ; چون عملیات ماتریسی و برداری (vectorized) بسیار بهینه‌تر، تمیزتر و برای محاسبات سنگین شبکه عصبی سریع‌تر هستند.
@@ -59,6 +59,14 @@ Structured vs Unstructured data فرق اصلیشون چیه؟ ; Structured = ه
 
 [Deep Learning][Neural Networks and Deep Learning][W2-01-Binary-Classification]
 در نمادگذاری این دوره، ماتریس Y نشان‌دهنده چیست و چه ابعادی دارد؟ ; ماتریس برچسب‌ها (labels) که از چیدن ستونی خروجی‌ها ساخته شده و ابعاد آن (1, m) است.
+
+[Deep Learning][Neural Networks and Deep Learning][W2-02-Logistic-Regression] مقدار y-hat در رگرسیون لجستیک (Logistic Regression) نشان‌دهنده چیست؟ ; \(\hat{y} = P(y=1 \mid x)\)، یعنی احتمال اینکه با توجه به ویژگی‌های ورودی \(x\)، برچسب واقعی \(y\) برابر 1 باشد.
+
+[Deep Learning][Neural Networks and Deep Learning][W2-02-Logistic-Regression] چرا در رگرسیون لجستیک به تابع فعال‌ساز سیگموئید (Sigmoid) نیاز داریم؟ ; چون تابع سیگموئید هر عدد حقیقی را به بازه \((0,1)\) می‌برد و خروجی را به یک احتمال (Probability) معتبر تبدیل می‌کند.
+
+[Deep Learning][Neural Networks and Deep Learning][W2-02-Logistic-Regression] چرا یک خروجی خطی به فرم \(w^T x + b\) برای طبقه‌بندی دودویی (Binary Classification) مناسب نیست؟ ; چون مقادیر خروجی خطی می‌تواند منفی یا بزرگ‌تر از 1 شود که به عنوان احتمال (Probability) قابل تفسیر نیست.
+
+[Deep Learning][Neural Networks and Deep Learning][W2-02-Logistic-Regression] تعبیر احتمالی اصلی رگرسیون لجستیک چیست؟ ; مدل سعی می‌کند احتمال شرطی \(P(y=1 \mid x)\) را تخمین بزند، یعنی شانس اینکه ورودی \(x\) متعلق به کلاس مثبت باشد.
 
 
 ## Needs Review
