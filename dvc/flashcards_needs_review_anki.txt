@@ -1,0 +1,7 @@
+#separator:tab
+#html:true
+#notetype:Basic
+#deck:DVC::Introduction to Data Versioning with DVC
+#tags column:3
+#columns:Front	Back	Tags
+<div dir="ltr" style="text-align:left;font-family:monospace,sans-serif">What is the difference between `dvc.lock` and cache protection?</div>	<div dir="ltr" style="text-align:left;font-family:monospace,sans-serif">dvc.lock is a hash-based record of pipeline inputs and outputs used for staleness detection; cache protection may make workspace files read-only when link-based cache types (hardlinks, symlinks) are used</div>	domain::dvc course::introduction_to_data_versioning_with_dvc section::ch1_git_and_dvc_fundamentals

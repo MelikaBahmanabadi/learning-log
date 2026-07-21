@@ -1,0 +1,7 @@
+#separator:tab
+#html:true
+#notetype:Basic
+#deck:DVC فارسی::Introduction to Data Versioning with DVC
+#tags column:3
+#columns:Front	Back	Tags
+<div dir="rtl" style="text-align:right;font-family:Tahoma,Arial,sans-serif">تفاوت `dvc.lock` و cache protection چیست؟</div>	<div dir="rtl" style="text-align:right;font-family:Tahoma,Arial,sans-serif">dvc.lock یک دفتر hash-based از ورودی‌ها و خروجی‌های pipeline است که برای تشخیص staleness استفاده می‌شود؛ cache protection ممکن است workspace files را هنگام استفاده از cache link typeهای مبتنی بر hardlink یا symlink read-only کند</div>	domain::dvc course::introduction_to_data_versioning_with_dvc section::فصل_۱_مبانی_git_و_dvc
