@@ -275,4 +275,4 @@ LATERAL join چیست؟ ; زیرپرس‌وجو را به ازای هر سطر q
 آیا window functions می‌توانند از index استفاده کنند؟ ; ORDER BY در window می‌تواند از index استفاده کند. PARTITION BY از index روی ستون پارتیشن بهره می‌برد. یک index ترکیبی روی (partition, order) می‌تواند کل sort window را پوشش دهد.
 
 تفاوت FILTER و CASE-based conditional aggregation چیست؟ ; FILTER خواناتر است و در PostgreSQL ممکن است استراتژی اجرای متفاوتی فعال کند. در عمل هر دو پلن مشابهی دارند — FILTER برای خوانایی، CASE برای سازگاری.
-<!-- جواب‌های اشتباه از آزمون‌های دوره‌ای اینجا بیایند -->
+
