@@ -197,3 +197,88 @@ How would you redesign an EAV system? ; Analyze common vs subtype-specific vs dy
 How would you store a threaded comments system with infinite nesting? ; Closure table. It handles arbitrary depth, ancestor/descendant queries in single SQL, and mixed read/write workloads. Alternative: path enumeration for simpler ancestry-only queries.
 
 Should I use ENUM or a lookup table? ; Always prefer lookup table unless the values are truly fixed forever. ENUM = DDL (ALTER TABLE, lock, downtime). Lookup table = DML (INSERT, no downtime, FK-able).
+
+---
+
+## Ch 4 — Window Functions Basics
+
+What is a window function vs GROUP BY? ; Window function computes across rows related to current row WITHOUT collapsing them — each input row keeps its identity. GROUP BY collapses rows into one output row per group.
+
+What are the three parts of a window function syntax? ; FUNCTION(...) OVER (PARTITION BY ... ORDER BY ... frame_clause). Partition defines groups, order defines sorting within group, frame defines which rows from partition to include.
+
+What is the difference between ROW_NUMBER, RANK, and DENSE_RANK? ; ROW_NUMBER assigns unique sequential numbers (ties get arbitrary order, no gaps). RANK gives same rank to ties but leaves gaps (1,1,3,4). DENSE_RANK gives same rank to ties with no gaps (1,1,2,3).
+
+---
+
+## Ch 4 — LAG / LEAD
+
+What do LAG and LEAD do? ; LAG accesses a row before the current row; LEAD accesses a row after. Used for time-series comparisons (day-over-day change), period-over-period analysis.
+
+What happens to LAG/LEAD at the edges of the partition? ; They return NULL (no previous/next row). Use the default parameter: LAG(col, 1, 0) to return 0 instead of NULL.
+
+---
+
+## Ch 4 — FIRST_VALUE / LAST_VALUE / NTH_VALUE
+
+Why does LAST_VALUE often give the wrong answer? ; Default frame is RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW — so LAST_VALUE returns the current row's value. Fix: specify ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING.
+
+---
+
+## Ch 4 — Window Frame Clauses
+
+What's the difference between ROWS, RANGE, and GROUPS frames? ; ROWS = physical rows (fast, deterministic). RANGE = logical values — rows with same ORDER BY value are peers (slower, needs peer comparison). GROUPS = groups of peer rows (PostgreSQL 11+, SQL:2011).
+
+What is the default frame with ORDER BY? Without ORDER BY? ; With ORDER BY: RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW. Without ORDER BY: the entire partition (equivalent to UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING).
+
+---
+
+## Ch 4 — CTEs
+
+What's the difference between a CTE and a subquery? ; CTE is named, reusable across the query, and improves readability. Subquery is inline, must be repeated if needed twice. CTEs can be recursive (WITH RECURSIVE) — subqueries cannot.
+
+When does a recursive CTE cycle — what's the base case and recursive step? ; Base case (non-recursive term) seeds the result. Recursive step joins back to the CTE itself. UNION ALL combines both. Cycle prevention: track visited nodes in an array and check with NOT x = ANY(path).
+
+---
+
+## Ch 4 — PIVOT / UNPIVOT
+
+How do you pivot rows to columns in MySQL/PostgreSQL? ; Use CASE + GROUP BY: SUM(CASE WHEN quarter='Q1' THEN revenue END) AS q1, etc. PostgreSQL also supports crosstab() from the tablefunc extension.
+
+---
+
+## Ch 4 — LATERAL
+
+What is a LATERAL join? ; Runs the subquery for each row of the outer query — like a correlated subquery but cleaner. Useful for TOP-N per group (LIMIT in the lateral subquery). PostgreSQL and MySQL 8.0.14+.
+
+---
+
+## Ch 4 — GROUPING SETS
+
+What's the difference between ROLLUP and CUBE? ; ROLLUP produces hierarchical subtotals: GROUP BY ROLLUP (year, month) → (year,month), (year), (). CUBE produces all combinations: GROUP BY CUBE (a, b) → (a,b), (a), (b), ().
+
+How does GROUPING() help with GROUPING SETS results? ; GROUPING(col) returns 1 when the row is a subtotal (col is NULL because of the grouping, not because it's actually NULL). Distinguishes real NULL values from grouping NULLs.
+
+---
+
+## Ch 4 — Conditional Aggregation
+
+How do you count rows by condition without a subquery? ; Use FILTER clause: COUNT(*) FILTER (WHERE salary > 80000). PostgreSQL, SQLite, DuckDB. MySQL/SQL Server: SUM(CASE WHEN salary > 80000 THEN 1 ELSE 0 END).
+
+---
+
+## Ch 4 — Advanced Patterns
+
+Why can't you use a window function in the WHERE clause? ; Window functions execute after WHERE (logical query order). Compute in a subquery/CTE, then filter outside.
+
+How do you find the second-highest salary per department? ; Use DENSE_RANK() in a subquery: SELECT * FROM (SELECT *, DENSE_RANK() OVER (PARTITION BY dept ORDER BY salary DESC) AS rnk FROM employees) ranked WHERE rnk = 2.
+
+What's the difference between WHERE and HAVING? ; WHERE filters rows BEFORE GROUP BY. HAVING filters groups AFTER GROUP BY. Aggregate functions can't go in WHERE — they don't exist yet at that point.
+
+---
+
+## Ch 4 — Query Perf & Edge Cases
+
+Can window functions use indexes? ; ORDER BY in a window can use an index (same as ORDER BY in a regular query). PARTITION BY benefits from an index on the partition column. A composite index on (partition, order) columns can cover the entire window sort.
+
+How does FILTER execute vs CASE-based conditional aggregation? ; FILTER is semantically clearer and in PostgreSQL can enable different execution strategies (partial aggregation). In practice, both produce similar plans — use FILTER for readability, CASE for compatibility.
+
