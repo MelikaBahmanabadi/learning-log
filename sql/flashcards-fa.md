@@ -194,5 +194,85 @@ ENUM یا lookup table؟ ; همیشه lookup table مگر اینکه مقادی�
 
 ---
 
-## Needs Review
-<!-- جواب‌های اشتباه از آزمون‌های دوره‌ای اینجا بیایند -->
+## Ch 4 — مبانی Window Functions
+
+تفاوت window function و GROUP BY چیست؟ ; Window function روی مجموعه‌ای از سطرهای مرتبط با سطر جاری محاسبه می‌کند بدون اینکه سطرها را ادغام کند — هر سطر هویت خود را حفظ می‌کند. GROUP BY سطرها را یک گروه می‌کند و یک خروجی به ازای هر گروه می‌دهد.
+
+سه بخش syntax یک window function چیست؟ ; FUNCTION(...) OVER (PARTITION BY ... ORDER BY ... frame_clause). PARTITION BY گروه‌ها را مشخص می‌کند، ORDER BY ترتیب درون گروه را مشخص می‌کند، frame تعیین می‌کند کدام سطرهای گروه در محاسبه شرکت کنند.
+
+تفاوت ROW_NUMBER، RANK و DENSE_RANK چیست؟ ; ROW_NUMBER اعداد یکتا و ترتیبی می‌دهد (تساوی ترتیب دلخواه دارد، gap ندارد). RANK به مقادیر مساوی یک rank می‌دهد ولی gap دارد (۱,۱,۳,۴). DENSE_RANK به مقادیر مساوی یک rank می‌دهد و gap ندارد (۱,۱,۲,۳).
+
+---
+
+## Ch 4 — LAG / LEAD
+
+LAG و LEAD چه کاری انجام می‌دهند؟ ; LAG به سطر قبل از سطر جاری دسترسی می‌دهد و LEAD به سطر بعد از سطر جاری. برای مقایسه سری‌های زمانی (تغییر روز-به-روز) استفاده می‌شوند.
+
+وقتی LAG/LEAD در لبه‌های پارتیشن قرار دارند چه اتفاقی می‌افتد؟ ; NULL برمی‌گردانند (سطر قبلی/بعدی وجود ندارد). از پارامتر پیش‌فرض استفاده کن: LAG(col, 1, 0) تا به جای NULL صفر برگرداند.
+
+---
+
+## Ch 4 — FIRST_VALUE / LAST_VALUE / NTH_VALUE
+
+چرا LAST_VALUE اغلب جواب اشتباه می‌دهد؟ ; فریم پیش‌فرض RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW است — پس LAST_VALUE مقدار سطر جاری را برمی‌گرداند. راه‌حل: ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING را مشخص کن.
+
+---
+
+## Ch 4 — پنجره (Window Frame)
+
+تفاوت ROWS، RANGE و GROUPS چیست؟ ; ROWS = سطرهای فیزیکی (سریع، قطعی). RANGE = مقادیر منطقی — سطرهایی با مقدار ORDER BY یکسان همتا محسوب می‌شوند (کندتر). GROUPS = گروه‌های سطرهای همتا (PostgreSQL 11+).
+
+فریم پیش‌فرض با ORDER BY چیست؟ بدون ORDER BY؟ ; با ORDER BY: RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW. بدون ORDER BY: کل پارتیشن.
+
+---
+
+## Ch 4 — CTE
+
+تفاوت CTE و subquery چیست؟ ; CTE نام‌گذاری شده، قابل استفاده مجدد در query است و خوانایی را بهبود می‌دهد. Subquery درون‌خطی است، باید تکرار شود. CTE می‌تواند بازگشتی باشد (WITH RECURSIVE) — subquery نمی‌تواند.
+
+در recursive CTE، base case و recursive step چه نقشی دارند؟ ; Base case (عبارت غیربازگشتی) نتیجه اولیه را می‌سازد. Recursive step به CTE برمی‌گردد و به آن JOIN می‌خورد. UNION ALL هر دو را ترکیب می‌کند. جلوگیری از چرخه: مسیر پیموده‌شده را در array ذخیره کن و با NOT x = ANY(path) بررسی کن.
+
+---
+
+## Ch 4 — PIVOT / UNPIVOT
+
+چطور سطرها را به ستون تبدیل کنیم (PIVOT) در MySQL/PostgreSQL؟ ; CASE + GROUP BY: SUM(CASE WHEN quarter='Q1' THEN revenue END) AS q1. PostgreSQL از crosstab() هم پشتیبانی می‌کند.
+
+---
+
+## Ch 4 — LATERAL
+
+LATERAL join چیست؟ ; زیرپرس‌وجو را به ازای هر سطر query بیرونی اجرا می‌کند — شبیه correlated subquery اما خواناتر. کاربرد: TOP-N به ازای هر گروه. PostgreSQL و MySQL 8.0.14+.
+
+---
+
+## Ch 4 — GROUPING SETS
+
+تفاوت ROLLUP و CUBE چیست؟ ; ROLLUP زیرمجموع‌های سلسله‌مراتبی تولید می‌کند: GROUP BY ROLLUP (year, month) → (year,month), (year), (). CUBE تمام ترکیب‌ها را تولید می‌کند: GROUP BY CUBE (a, b) → (a,b), (a), (b), ().
+
+تابع GROUPING() چطور کمک می‌کند؟ ; GROUPING(col) وقتی سطر زیرمجموعه است ۱ برمی‌گرداند. بین NULL واقعی و NULL حاصل از grouping تمایز قائل می‌شود.
+
+---
+
+## Ch 4 — Conditional Aggregation
+
+چطور سطرها را بر اساس شرط بدون subquery بشماریم؟ ; FILTER clause: COUNT(*) FILTER (WHERE salary > 80000). در PostgreSQL، SQLite، DuckDB. در MySQL/SQL Server: SUM(CASE WHEN salary > 80000 THEN 1 ELSE 0 END).
+
+---
+
+## Ch 4 — الگوهای پیشرفته
+
+چرا window function در WHERE کار نمی‌کند؟ ; Window functions بعد از WHERE اجرا می‌شوند (ترتیب منطقی SQL). در یک subquery/CTE محاسبه کن، بعد خارجی فیلتر کن.
+
+چطور دومین حقوق بالاترین را به ازای هر بخش پیدا کنیم؟ ; DENSE_RANK() در subquery: SELECT * FROM (SELECT *, DENSE_RANK() OVER (PARTITION BY dept ORDER BY salary DESC) AS rnk FROM employees) ranked WHERE rnk = 2.
+
+تفاوت WHERE و HAVING چیست؟ ; WHERE سطرها را قبل از GROUP BY فیلتر می‌کند. HAVING گروه‌ها را بعد از GROUP BY فیلتر می‌کند. توابع aggregate در WHERE کار نمی‌کنند چون هنوز وجود ندارند.
+
+---
+
+## Ch 4 — کارایی Query
+
+آیا window functions می‌توانند از index استفاده کنند؟ ; ORDER BY در window می‌تواند از index استفاده کند. PARTITION BY از index روی ستون پارتیشن بهره می‌برد. یک index ترکیبی روی (partition, order) می‌تواند کل sort window را پوشش دهد.
+
+تفاوت FILTER و CASE-based conditional aggregation چیست؟ ; FILTER خواناتر است و در PostgreSQL ممکن است استراتژی اجرای متفاوتی فعال کند. در عمل هر دو پلن مشابهی دارند — FILTER برای خوانایی، CASE برای سازگاری.
+
