@@ -127,3 +127,73 @@ When is a full table scan actually faster than using an index? ; When the optimi
 Why does `WHERE phone = 5551234` fail to use an index on a VARCHAR column? ; Implicit type cast — comparing VARCHAR to INT converts every row's value, preventing index use. Fix: `WHERE phone = '5551234'` (explicit string literal).
 
 How do you find unused indexes? ; MySQL: `SELECT * FROM sys.schema_unused_indexes`. PostgreSQL: `SELECT indexrelname, idx_scan FROM pg_stat_user_indexes WHERE idx_scan = 0`. Remove them to speed up writes.
+
+---
+
+## Ch 3 — Logical Design Antipatterns
+
+What is the "Jaywalking" antipattern? ; Storing multiple values in one column (comma-separated list). Problem: no FK, no index, querying requires FIND_IN_SET or LIKE. Fix: always use a join table.
+
+How do you model hierarchical data in SQL? ; Four techniques: adjacency list (parent_id — simple, depth-limited), nested sets (nsleft/nsright — great reads, painful writes), path enumeration (string path — simple ancestry), closure table (separate ancestor-descendant table — flexible, recommended). Pick closure table for most cases.
+
+What is a Closure Table? ; A separate table storing all ancestor-descendant pairs with depth. Query: find descendants by ancestor, find ancestors by descendant. Insert: copy all ancestors of parent + self. Supports arbitrary depth with single queries.
+
+When is the adjacency list (parent_id) model OK? ; When you only need the immediate parent (e.g., employee → manager) and never need full tree traversal. Shallow hierarchies only.
+
+What's wrong with making every table have an auto-increment id? ; It's the "ID Required" antipattern. Natural keys exist and are stable — use them. Surrogate keys add index overhead, obscure meaning, and expose business info (order count). Start with natural key, add surrogate only when needed.
+
+When are surrogate keys actually good? ; When no stable natural key exists, natural key is wide (>4 columns), or in distributed systems (UUID/ULID). Also for framework convention (Rails, Django).
+
+What's wrong with "we enforce data integrity in the app"? ; The "Keyless Entry" antipattern. App code has bugs → dirty data. Every client re-implements checks. No FK enforcement, orphaned rows. DB constraints are atomic, consistent, and enforced for all access paths.
+
+What is the EAV (Entity-Attribute-Value) antipattern? ; A "generic schema" with rows of (entity_id, attr_name, attr_value). Problems: all values stored as VARCHAR (no type safety), can't enforce FKs, SELECT requires N joins or pivot queries, no required attributes. Almost always wrong.
+
+What are better alternatives to EAV? ; Single Table Inheritance (few shared attributes in one table + nullable subtype columns), Class Table Inheritance (common table + subtype-specific tables), or JSONB for truly dynamic attributes.
+
+What is the Polymorphic Associations antipattern? ; A FK column that references any table: parent_type + parent_id. Problem: no referential integrity (DB can't enforce FK to multiple tables), JOINs need UNION or conditional. Fix: reverse the relationship (separate join table per parent type) or use a shared supertable.
+
+When is Polymorphic Associations OK? ; Auditing/logging where referential integrity isn't needed. Never for domain data.
+
+---
+
+## Ch 3 — Physical Design Antipatterns
+
+What's wrong with storing FLOAT for money? ; Floating point can't represent exact decimals (0.1+0.2=0.30000000000000004). Use DECIMAL(precision, scale) or store as cents in BIGINT.
+
+What is the Metadata Tribbles antipattern? ; Creating separate tables/columns for similar data over time: Bugs_2009, Bugs_2010. Problem: querying across years = UNION ALL N tables, adding a year = schema change. Fix: a single table with a year column + partitioning.
+
+Why are ENUMs problematic in production? ; Adding a value requires ALTER TABLE (DDL → table lock → potential downtime). No referential integrity (can't FK to ENUM). Different tables drift out of sync. Prefer a lookup table — new values are INSERT (DML), not ALTER TABLE.
+
+When are ENUMs acceptable? ; Truly fixed sets (US state abbreviations, ISO country codes — but even then, a lookup table costs nothing). Small internal apps where status never changes and downtime is acceptable.
+
+What's wrong with storing multiple tag columns (tag1, tag2, tag3)? ; Querying is awkward (WHERE tag1='x' OR tag2='x' OR tag3='x'), adding a 4th tag = ALTER TABLE. Fix: join table.
+
+---
+
+## Ch 3 — Query & Application Antipatterns
+
+What's the "Phantom Files" antipattern? ; Storing a file path in the DB, actual file on disk. Problems: DB row & file get out of sync, backup needs two processes, no transactional consistency. Fix: store BLOB in DB (small files) or object store with checksum.
+
+Why is SELECT * bad in views and procedures? ; Returns columns in table-definition order, adding a column changes the view output (breaks consuming code), can't use covering indexes effectively, extra data on wire. Always name columns explicitly.
+
+What's wrong with using -1 or 'N/A' instead of NULL? ; The "Fear of the Unknown" antipattern. Sentinel values break aggregate functions (AVG includes -1, COUNT includes sentinels), every app must know the convention, impossible for FKs. Use NULL — the DB is designed for it.
+
+When are sentinel values OK? ; Reporting tools that can't handle NULLs (but fix the tool, not the data). Or when NULL is semantically different from "missing" (rare — consider a separate flag column).
+
+What's the "Spaghetti Query" antipattern? ; One giant query with 12+ JOINs, 5-level nested subqueries, duplicated logic. Fix: CTEs, temp tables, views, or break into app-level steps.
+
+What's the "God Table" antipattern? ; A table with 50+ columns used by every feature. Problems: wide rows, row/page size limits, lock contention, ORM nightmare. Fix: vertical partitioning — split by domain.
+
+What's the "Too Many Joins" antipattern? ; Pulling in tables only used as bridges, using JOIN where EXISTS suffices, deduping with DISTINCT because JOINs multiplied rows. Fix: use EXISTS for existence checks, pre-aggregate with CTE.
+
+---
+
+## Ch 3 — Interview Keys
+
+What's the worst SQL antipattern and why? ; EAV or Jaywalking — both are common, break normalization, destroy queryability, and require costly rewrites. EAV: all values as VARCHAR, no type safety. Jaywalking: no FK, can't index.
+
+How would you redesign an EAV system? ; Analyze common vs subtype-specific vs dynamic attributes. Common → columns, subtype-specific → class table inheritance, dynamic → JSONB. Migrate in stages: new schema, write to both, backfill, drop EAV.
+
+How would you store a threaded comments system with infinite nesting? ; Closure table. It handles arbitrary depth, ancestor/descendant queries in single SQL, and mixed read/write workloads. Alternative: path enumeration for simpler ancestry-only queries.
+
+Should I use ENUM or a lookup table? ; Always prefer lookup table unless the values are truly fixed forever. ENUM = DDL (ALTER TABLE, lock, downtime). Lookup table = DML (INSERT, no downtime, FK-able).
