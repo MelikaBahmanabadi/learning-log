@@ -1,7 +1,168 @@
-#separator:tab
-#html:true
-#notetype:Basic
-#deck:Python::Python Fundamentals
-#tags column:3
-#columns:Front	Back	Tags
-<div dir="ltr" style="text-align:left;font-family:monospace,sans-serif">A: `is` checks identity (same object)</div>	<div dir="ltr" style="text-align:left;font-family:monospace,sans-serif">`==` checks value equality.</div>	domain::python course::python_fundamentals section::ch_1_python_basics_environment
+
+# Python Flashcards — EN (Anki Import)
+
+Q:: Pythonic file open?
+A:: `with open(path) as fh:`
+--
+Q:: EAFP vs LBYL?
+A:: EAFP = try/except (Pythonic). LBYL = if checks.
+--
+Q:: Create venv?
+A:: `python -m venv .venv && source .venv/bin/activate`
+--
+Q:: Modern project config?
+A:: `pyproject.toml` (PEP 517/518/621).
+--
+Q:: Falsy values?
+A:: `0`, `0.0`, `""`, `[]`, `{}`, `set()`, `None`, `False`.
+--
+Q:: Swap two variables?
+A:: `a, b = b, a`
+--
+Q:: Index + value in loop?
+A:: `for i, v in enumerate(seq):`
+--
+Q:: Iterate two sequences?
+A:: `for a, b in zip(xs, ys):`
+--
+Q:: Walrus operator?
+A:: `:=` — assign and use in expression.
+--
+Q:: Default mutable arg gotcha?
+A:: `def f(lst=[])` shared. Use `def f(lst=None)`.
+--
+Q:: Positional-only params?
+A:: Params before `/` can't be keyword: `def div(a, b, /):`
+--
+Q:: Keyword-only params?
+A:: Params after `*` must be keyword: `def f(*, kw):`
+--
+Q:: `if __name__ == "__main__"`?
+A:: Run only when executed directly.
+--
+Q:: PEP 8 function naming?
+A:: `snake_case`
+--
+Q:: PEP 8 class naming?
+A:: `PascalCase`
+--
+Q:: LEGB rule?
+A:: Local → Enclosing → Global → Built-in.
+--
+Q:: `is` vs `==`?
+A:: `is` = identity; `==` = value equality.
+--
+Q:: List comprehension?
+A:: `[x**2 for x in range(10) if x % 2 == 0]`
+--
+Q:: Dict comprehension?
+A:: `{x: x**2 for x in range(5)}`
+--
+Q:: Set comprehension?
+A:: `{x for x in range(20) if x % 2 == 0}`
+--
+Q:: Flatten nested list?
+A:: `[x for row in matrix for x in row]`
+--
+Q:: `for` loop `else` clause?
+A:: Runs if loop completed without `break`.
+--
+Q:: Iterate dict kv pairs?
+A:: `for k, v in dict.items():`
+--
+Q:: f-string 2 decimal places?
+A:: `f"{value:.2f}"`
+--
+Q:: pathlib join paths?
+A:: `Path("folder") / "sub" / "file.txt"`
+--
+Q:: Copy a list?
+A:: `lst.copy()` or `lst[:]`
+--
+Q:: Dict merge (Python 3.9+)?
+A:: `dict1 | dict2`
+--
+Q:: Safe dict get with default?
+A:: `dict.get("key", "default")`
+--
+Q:: List vs tuple?
+A:: List mutable, tuple immutable. tuple = memory-efficient, hashable, fixed record. list = over-allocates for append.
+--
+Q:: Slice [start:stop:step]?
+A:: start inclusive, stop exclusive, step = stride. Negative step reverses. All optional.
+--
+Q:: seq[::-1]?
+A:: Reverses sequence.
+--
+Q:: Assign to slice?
+A:: `list[2:5] = [100,200]` — replaces items. Can change length. Step-slice needs matching length.
+--
+Q:: Insert at i with slice?
+A:: `list[i:i] = [item]`
+--
+Q:: Slice object?
+A:: `slice(start, stop, step)` — implicit from `seq[1:5:2]`. Can name and reuse.
+--
+Q:: list.append() time complexity?
+A:: O(1) amortized.
+--
+Q:: list.pop(0) time complexity?
+A:: O(n) — all elements shift. Use `deque.popleft()` for O(1).
+--
+Q:: namedtuple?
+A:: `namedtuple("Point", ["x","y"])` — tuple subclass with named fields. Immutable, hashable, efficient.
+--
+Q:: array.array vs list?
+A:: array for homogeneous numeric data — type-safe, memory-efficient, fast binary I/O.
+--
+Q:: deque vs list?
+A:: deque has O(1) append/popleft on both ends. list has O(n) pop(0). Use for queues, sliding windows.
+--
+Q:: bisect.insort?
+A:: Binary search for insertion point (O(log n)), then insert (O(n) shift). Keeps list sorted.
+--
+Q:: bisect_left vs bisect?
+A:: bisect_left = before equal values. bisect = after equal values.
+--
+Q:: Bounded deque?
+A:: `deque(maxlen=5)` — drops items from opposite end when full.
+--
+Q:: Sequence protocol?
+A:: `__len__` + `__getitem__` — enables slicing, iteration, `in`, `reversed()`.
+--
+Q:: struct.pack?
+A:: Pack Python values to binary: `struct.pack('>i4sh', 7, b'spam', 8)`.
+--
+Q:: memoryview?
+A:: Zero-copy buffer access — view/mutate bytes without copying.
+--
+Q:: tuple packing/unpacking?
+A:: Pack: `t = 1, 2, 3`. Unpack: `a, b, c = t`.
+--
+Q:: namedtuple serialization?
+A:: `._asdict()` method. Same memory as regular tuple.
+--
+Q:: Mutate tuple contents?
+A:: TypeError — tuple immutable. But mutable objects INSIDE a tuple CAN be mutated.
+--
+Q:: Reverse list in-place vs new copy?
+A:: `list.reverse()` in-place. `reversed(seq)` iterator. `seq[::-1]` new list.
+--
+Q:: seq[::2]?
+A:: Every second element.
+--
+Q:: Split sequence at point?
+A:: `head, tail = seq[:i], seq[i:]`
+--
+Q:: Ellipsis (...) in Python?
+A:: "all previous dimensions" — used in NumPy and custom containers.
+--
+Q:: Container vs flat sequences?
+A:: Container (list, tuple, deque) = references, mixed types. Flat (str, bytes, array) = values inline, one type.
+--
+Q:: deque for queue?
+A:: FIFO: deque O(1) popleft. list O(n) pop(0). Thread-safe: `queue.Queue`.
+--
+Q:: Rolling window with zip?
+A:: `list(zip(*(seq[i:] for i in range(n))))` — n-length sliding tuples.
+

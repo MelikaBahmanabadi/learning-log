@@ -29,6 +29,6 @@ Structured study notes for advanced SQL.
 
 ## Structure
 
-- `ch<n>-<name>.md` — Chapter notes (concepts, examples, interview Q&A)
+- `W<n>-summary.md` — Weekly summary notes (concepts, examples, interview Q&A)
 - `flashcards.md` — Anki-ready Q&A cards
 - `progress.md` — What's done, what's next
