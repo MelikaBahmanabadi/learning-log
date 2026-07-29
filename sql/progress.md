@@ -5,7 +5,7 @@
 - Ch 1: Query Fundamentals & Joins — DONE (100%)
 - Ch 2: Indexing & Query Execution Plans — DONE (100%)
 - Ch 3: SQL Antipatterns & Better Designs — DONE (100%)
-- Ch 4: Window Functions & Advanced Queries — IN PROGRESS (30%)
+- Ch 4: Window Functions & Advanced Queries — IN PROGRESS (no test yet)
 - Ch 5: Storage Engines & Data Structures — NOT STARTED
 - Ch 6: Distributed Databases — NOT STARTED
 - Ch 7: Consistency, Transactions & MVCC — NOT STARTED

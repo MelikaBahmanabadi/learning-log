@@ -103,3 +103,88 @@ A: `dict1 | dict2`
 
 Q: How to safely get a dict key with default?
 A: `dict.get("key", "default")`
+
+---
+
+## Ch 2: Sequences, Lists, Tuples & Slicing
+
+Q: What's the difference between `list` and `tuple`?
+A: list is mutable, tuple is immutable. tuple uses less memory, can be a dict key, and represents a fixed record. list over-allocates for efficient append.
+
+Q: How does slicing `[start:stop:step]` work?
+A: start = inclusive first index, stop = exclusive end index, step = stride. Negative step reverses direction. All three are optional.
+
+Q: What does `seq[::-1]` do?
+A: Reverses the sequence — negative step with omitted start/stop traverses backwards.
+
+Q: How do you assign to a slice?
+A: `list[2:5] = [100, 200]` replaces items 2–5 with new items. Can change list length. Step-slice assignment requires matching lengths.
+
+Q: How do you insert into a list at position i using slices?
+A: `list[i:i] = [item]` — inserts item at index i without removing anything.
+
+Q: What is a slice object?
+A: `slice(start, stop, step)` — created implicitly by `seq[1:5:2]`. Can be named and reused: `s = slice(1, 5, 2); seq[s]`.
+
+Q: What's the time complexity of `list.append()`?
+A: O(1) amortized — list over-allocates capacity so most appends don't reallocate.
+
+Q: What's the time complexity of `list.pop(0)`?
+A: O(n) — all remaining elements shift left. Use `collections.deque.popleft()` for O(1).
+
+Q: What is a `namedtuple`?
+A: `namedtuple("Point", ["x", "y"])` creates a tuple subclass with named fields. Access by name (`p.x`) or position (`p[0]`). Immutable, hashable, memory-efficient.
+
+Q: When to use `array.array` vs `list`?
+A: `array.array` for large homogeneous numeric data — memory-efficient, type-safe, fast binary I/O. List for heterogeneous or mixed-type data.
+
+Q: What does `collections.deque` offer over `list`?
+A: O(1) `append`/`popleft` on BOTH ends. List has O(n) `pop(0)`. deque is ideal for queues, sliding windows, and bounded buffers (`maxlen`).
+
+Q: How does `bisect.insort` work?
+A: Finds insertion point via binary search (O(log n)), then inserts (O(n) shift). Keeps list sorted.
+
+Q: What does `bisect.bisect_left` vs `bisect.bisect` differ on?
+A: `bisect_left` returns leftmost insertion point (before existing equal values). `bisect` returns rightmost (after equal values).
+
+Q: How do you create a bounded deque that drops old items?
+A: `deque(maxlen=5)` — when full, new append drops the item on the opposite end.
+
+Q: What's the sequence protocol?
+A: Implement `__len__` and `__getitem__` — makes any class support slicing, iteration, `in`, `reversed()`.
+
+Q: What's `struct.pack` used for?
+A: Pack Python values into binary bytes according to a format string: `struct.pack('>i4sh', 7, b'spam', 8)`.
+
+Q: What's `memoryview` for?
+A: Zero-copy access to an object's buffer — view and mutate bytes without copying the underlying data.
+
+Q: What's the tuple packing vs unpacking syntax?
+A: Packing: `t = 1, 2, 3` → tuple `(1, 2, 3)`. Unpacking: `a, b, c = t` → individual variables.
+
+Q: How do named tuples compare to regular tuples for serialization?
+A: Named tuples have `._asdict()` method for dict conversion. Same memory footprint as regular tuples.
+
+Q: What happens if you assign to a tuple?
+A: `TypeError` — tuples are immutable. But if a tuple contains a mutable object, that object CAN be mutated.
+
+Q: How do you reverse a list in-place vs create a reversed copy?
+A: `list.reverse()` reverses in-place (returns None). `reversed(seq)` returns an iterator. `seq[::-1]` creates a new reversed list.
+
+Q: What does `seq[::2]` return?
+A: Every second element from the sequence.
+
+Q: How do you split a sequence at a point?
+A: `head, tail = seq[:i], seq[i:]`
+
+Q: What is `Ellipsis` (`...`) used for in Python?
+A: In custom containers and NumPy: `arr[..., 0]` means "all previous dimensions, then column 0".
+
+Q: What's the difference between container and flat sequences?
+A: Container sequences (list, tuple, deque) hold references = can mix types. Flat sequences (str, bytes, array) store values directly = memory-efficient, one type.
+
+Q: When should you use `collections.deque` for a queue?
+A: FIFO queue — `deque` gives O(1) `popleft`. list gives O(n) `pop(0)`. For thread-safe queue, use `queue.Queue`.
+
+Q: What is a rolling window pattern with zip?
+A: `list(zip(*(seq[i:] for i in range(n))))` — produces n-length tuples sliding over the sequence.
