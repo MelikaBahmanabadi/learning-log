@@ -328,3 +328,43 @@ A: `" ".join(s.split())` — split() collapses any whitespace run, join reassemb
 
 Q: What's `str.casefold()` vs `str.lower()` for Turkish i?
 A: Both are locale-independent, but `casefold()` is the stronger, Unicode-aware lowercase used for caseless matching — prefer it for `==`-style comparisons.
+
+---
+
+## Ch 5: Functions, Scope & Closures
+
+Q: What's the mutable default argument gotcha?
+A: Defaults evaluate once at def time — `def f(x, lst=[])` reuses the SAME list across calls. Fix: `def f(x, lst=None): lst = [] if lst is None else lst`.
+
+Q: What do `*args` and `**kwargs` collect?
+A: `*args` → tuple of extra positional args. `**kwargs` → dict of extra keyword args. Inverse: `f(*[1,2,3])` unpacks a list into positional, `f(**{"a":1})` unpacks a dict into keyword.
+
+Q: How do you force keyword-only or positional-only parameters?
+A: `def f(a, b, *, c)` — `*` makes everything after keyword-only. `def f(a, b, /)` — `/` makes everything before positional-only (Python 3.8+).
+
+Q: What's the LEGB rule?
+A: Name resolution order: Local → Enclosing → Global → Built-in. Assignment in a function makes a name local; reading falls back outward.
+
+Q: What does `nonlocal` do vs `global`?
+A: `nonlocal` rebinds a name from the enclosing function scope (needed to reassign a captured closure variable). `global` rebinds a module-level name. Avoid both when possible — return values instead.
+
+Q: What is a closure?
+A: A function plus the free variables it captures from its enclosing scope, kept alive after the enclosing function returns. `make_counter()` returning `counter()` that keeps its own `count`.
+
+Q: What's the late-binding gotcha in loops?
+A: A lambda/closure captures the *variable*, not its value: `[lambda: i for i in range(3)]` all return 2. Fix: bind as default `lambda i=i: i`.
+
+Q: Why does `x = 10` before a `print(x)` in a function raise UnboundLocalError?
+A: The later assignment makes `x` local to the whole function — Python decides scope at compile time, so the read can't see the global. Use `global x`.
+
+Q: What's `functools.partial`?
+A: Freezes part of a function's arguments: `partial(pow, 2)` → callable that takes one arg (exponent) and always uses base 2.
+
+Q: What does `map`/`filter` return in Python 3?
+A: Lazy iterators, not lists — wrap in `list()` to materialize: `list(map(f, xs))`, `list(filter(pred, xs))`. Use `sorted(xs, key=fn)` for ordering.
+
+Q: What are first-class functions in Python?
+A: Functions are objects: assignable (`g = f`), passable as args (`apply(f, x)`), returnable (`make_adder(5)` returns a closure), storable in lists/dicts.
+
+Q: What's the recursion limit and why does it matter?
+A: Default ~1000 (`sys.getrecursionlimit()`). Exceeding it raises `RecursionError`. Always have a base case; prefer iteration for deep recursion.
