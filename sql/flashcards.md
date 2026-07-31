@@ -282,3 +282,33 @@ Can window functions use indexes? ; ORDER BY in a window can use an index (same 
 
 How does FILTER execute vs CASE-based conditional aggregation? ; FILTER is semantically clearer and in PostgreSQL can enable different execution strategies (partial aggregation). In practice, both produce similar plans — use FILTER for readability, CASE for compatibility.
 
+
+---
+
+## Ch 5 — Storage Engines & Data Structures
+
+What is a storage engine? ; The layer that manages physical data organization, indexes, transactions, and recovery on disk. Separate from the query/planner layer. Row-oriented for OLTP, column-oriented for OLAP.
+
+Why do column-oriented stores compress better than row-oriented? ; Each column stores one type with high redundancy — run-length, dictionary, and delta encodings apply well. A row mixes types and values, so compression gains are small.
+
+What is a B+tree and why do most DBs use it? ; Balanced multi-way tree where only leaves hold data, internal nodes hold keys, and leaves are linked in a sorted list. Gives shallow trees (height 2-4), and the leaf list makes range scans fast. InnoDB, PostgreSQL, SQLite all use B+trees.
+
+How does a clustered index (InnoDB primary key) work? ; Table rows are physically stored in a B+tree ordered by the primary key. Secondary indexes point to the PK value, so a secondary lookup = 2 traversals. ORDER BY primary key is essentially free.
+
+Why is a monotonic PK better than a random UUID in InnoDB? ; Monotonic keys append at the right edge — no page splits, no fragmentation. Random UUIDs insert into the middle, causing page splits and write amplification.
+
+What is an LSM tree? ; Log-structured merge: append-only writes to an in-memory memtable, flushed as sorted SSTables, merged in the background by compaction. Optimized for write-heavy workloads (RocksDB, Cassandra, HBase). Trade-off: more read/space amplification.
+
+B-tree vs LSM — which for write-heavy, which for read-heavy? ; LSM for write-heavy: append-only, no random in-place updates. B-tree for read-heavy point lookups: lower read amplification, predictable latency. Choose by workload balance.
+
+What is write-ahead logging (WAL) and why needed? ; Every change is appended to a sequential log BEFORE the data file is updated. Makes lazy buffering safe: on crash, replay the log to recover committed transactions. Provides durability without fsync of every page per commit.
+
+What is a checkpoint? ; A point where dirty pages are flushed to the data file and the WAL is truncated. Crash recovery replays only from the last checkpoint, bounding recovery time.
+
+What is the difference between a latch and a lock? ; Latch: protects in-memory physical structures (buffer pool pages, index nodes), held microseconds, one operation, no transaction scope, no deadlock detection. Lock: protects logical data, held until transaction end, queued, supports deadlock detection.
+
+What do STEAL and NO-FORCE mean in recovery? ; STEAL = engine may flush dirty pages of uncommitted transactions early (needs undo log). NO-FORCE = engine doesn't flush all dirty pages at commit (relies on WAL redo). InnoDB and PostgreSQL are STEAL + NO-FORCE.
+
+How does MVCC let readers not block writers? ; Each transaction sees a consistent snapshot by keeping multiple row versions. Readers read old versions; writers create new versions; undo log / row versioning manages cleanup. No reader/writer lock contention.
+
+What is a hash index and its limitation? ; Maps key to file offset in an append-only log (Bitcask design). O(1) point lookups, but no range scans and must fit in memory. Good for key-value point workloads.
