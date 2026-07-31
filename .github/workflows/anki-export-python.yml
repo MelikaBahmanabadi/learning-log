@@ -39,41 +39,46 @@ jobs:
               return f'<div dir="rtl" style="text-align:right;font-family:Tahoma,Arial,sans-serif">{text}</div>'
 
           def parse_flashcards(filepath, wrap_fn, domain_tag, course_tag):
+              # Flashcards use Q:/A: pairs grouped under `## Section` headings.
+              # Lines within a section may be blank-separated; `;` never appears in cards.
               main_cards = []
               review_cards = []
               current_section_tag = 'general'
               in_needs_review = False
+              front = back = None
               try:
                   with open(filepath, 'r', encoding='utf-8') as f:
                       lines = f.readlines()
               except FileNotFoundError:
                   return main_cards, review_cards
 
+              def flush():
+                  nonlocal front, back
+                  if front is not None and back is not None:
+                      tags = f"domain::{domain_tag} course::{course_tag} section::{current_section_tag}"
+                      row  = SEP.join([wrap_fn(front), wrap_fn(back), tags])
+                      if in_needs_review:
+                          review_cards.append(row)
+                      else:
+                          main_cards.append(row)
+                  front = back = None
+
               for line in lines:
                   stripped = line.strip()
                   if stripped.startswith('## '):
+                      flush()
                       heading = stripped[3:].strip()
                       if heading.lower().startswith('needs review'):
                           in_needs_review = True
                       else:
                           in_needs_review = False
                           current_section_tag = re.sub(r'[^\w\u0600-\u06FF]+', '_', heading).strip('_').lower()
-                      continue
-                  if ';' not in stripped:
-                      continue
-                  if stripped.startswith('#') or stripped.startswith('<!--') or stripped.startswith('---'):
-                      continue
-                  parts = stripped.split(';', 1)
-                  if len(parts) != 2:
-                      continue
-                  front = wrap_fn(parts[0].strip())
-                  back  = wrap_fn(parts[1].strip())
-                  tags  = f"domain::{domain_tag} course::{course_tag} section::{current_section_tag}"
-                  row   = SEP.join([front, back, tags])
-                  if in_needs_review:
-                      review_cards.append(row)
-                  else:
-                      main_cards.append(row)
+                  elif stripped.startswith('Q:'):
+                      flush()
+                      front = stripped[2:].strip()
+                  elif stripped.startswith('A:') and front is not None:
+                      back = stripped[2:].strip()
+              flush()
               return main_cards, review_cards
 
           # ─── Read course name from progress.md ───────────────────────────
