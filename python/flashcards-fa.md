@@ -185,3 +185,82 @@ A: صف FIFO — `deque` با O(1) `popleft`. لیست با O(n) `pop(0)`. بر�
 
 Q: الگوی rolling window با zip چطوریه؟
 A: `list(zip(*(seq[i:] for i in range(n))))` — تاپل‌هایی به طول n که روی دنباله می‌لغزند.
+
+---
+
+## فصل ۳: دیکشنری‌ها، مجموعه‌ها و ساختارهای نگاشت
+
+Q: چطور یک دیکشنری با مقدار پیش‌فرض برای کلیدهای缺失 بسازیم؟
+A: `d.get("key", "default")` — مقدار پیش‌فرض برمی‌گردونه بدون KeyError. برای پیش‌فرض خودکار: `collections.defaultdict(list)`.
+
+Q: فرق `d.get(k)` و `d.setdefault(k, default)` چیه؟
+A: `get` مقدار پیش‌فرض برمی‌گردونه ولی دیکشنری رو تغییر نمی‌ده. `setdefault` اگه کلید نباشه مقدار پیش‌فرض رو اضافه می‌کنه و برمی‌گردونه. `setdefault` همیشه آرگومان پیش‌فرض رو ارزیابی می‌کنه (lazy نیست).
+
+Q: `defaultdict` چطور کار می‌کنه؟
+A: یک تابع factory می‌گیره. وقتی کلید缺失 با `d[key]` صدا زده بشه، factory صدا زده می‌شه تا مقدار پیش‌فرض رو تولید کنه: `defaultdict(list)` لیست خالی، `defaultdict(int)` صفر.
+
+Q: `collections.Counter` چیه؟
+A: زیرکلاس dict برای شمارش اشیاء hashable. `c = Counter("abracadabra")` → تعداد هر کاراکتر. متدهای `most_common(n)`، جمع و تفریق (`+`, `-`, `&`, `|`) و `elements()`.
+
+Q: چطور دو دیکشنری رو ادغام کنیم (Python 3.9+)؟
+A: `merged = d1 | d2` (دیکشنری جدید). `d1 |= d2` (درجا). کلیدهای تکراری از دیکشنری سمت راست برنده می‌شوند.
+
+Q: هوک `__missing__` چیه؟
+A: متدی روی زیرکلاس dict که وقتی `d[key]` KeyError می‌ده صدا زده می‌شه. برای مدیریت کلیدهای缺失: `class AutoDict(dict): def __missing__(self, k): return 0`.
+
+Q: `collections.OrderedDict` چه کاربردی داره وقتی خود dict مرتب هست؟
+A: `move_to_end(key)` و مقایسه برابری حساس به ترتیب. در غیر این صورت dict معمولی (3.7+) کافیه.
+
+Q: `collections.ChainMap` چیه؟
+A: چند دیکشنری رو یکجا به صورت یک نمای واحد نشون می‌ده. جستجو به ترتیب دیکشنری‌ها انجام می‌شه. تغییرات فقط روی دیکشنری اول اعمال می‌شه. مناسب برای لایه‌بندی کانفیگ.
+
+Q: چه نوع‌هایی در پایتون hashable هستند؟
+A: انواع immutable: int, float, str, bytes, tuple (اگه همه عناصر hashable باشند)، frozenset. انواع mutable (list, set, dict) hashable نیستند. اشیاء کاربر به طور پیش‌فرض hashable هستند (بر اساس id).
+
+Q: پیچیدگی زمانی `key in dict` vs `key in list`؟
+A: `key in dict` — O(1) میانگین (hash table). `key in list` — O(n) (جستجوی خطی). برای بررسی عضویت مجموعه‌های بزرگ از set/dict استفاده کن.
+
+Q: فرق `set` و `frozenset` چیه؟
+A: `set` mutable است (add/remove/discard/update). `frozenset` immutable و hashable است — می‌تونه به عنوان کلید دیکشنری یا داخل set دیگه استفاده بشه.
+
+Q: عملیات set: union vs intersection vs difference؟
+A: `a | b` — union (همه عناصر). `a & b` — intersection (مشترک‌ها). `a - b` — difference (در a که در b نیست). `a ^ b` — symmetric diff (در یکی، نه هر دو).
+
+Q: چطور بررسی کنیم a زیرمجموعه b هست؟
+A: `a <= b` یا `a.issubset(b)`. برای زیرمجموعه strict: `a < b`.
+
+Q: `MappingProxyType` چیه؟
+A: یک dict رو به صورت فقط‌خواندنی می‌پیچه. `MappingProxyType({"key": "val"})` — از تغییر جلوگیری می‌کنه. مناسب برای نمایش دیکشنری‌های داخلی به عنوان API.
+
+Q: خطر استفاده از شیء mutable به عنوان کلید دیکشنری؟
+A: اگه شیء بعد از درج تغییر کنه، hash آن عوض می‌شه. دیکشنری دیگه نمی‌تونه پیدا کنه (KeyError)، و ورودی قدیمی به عنوان زباله باقی می‌مونه.
+
+Q: چطور یک دیکشنری رو invert کنیم (جابجایی کلید و مقدار)؟
+A: `{v: k for k, v in d.items()}`. اگه مقادیر یکتا نباشند، کلیدهای بعدی قبلی رو بازنویسی می‌کنند — برای جمع‌آوری از `defaultdict(list)` استفاده کن.
+
+Q: چطور آیتم‌ها رو از یک لیست تاپل با دیکشنری group کنیم؟
+A: `defaultdict(list)` — `groups[lang].append(name)`. گروه‌بندی افراد بر اساس زبان، فایل‌ها بر اساس پسوند و غیره.
+
+Q: `Counter("abracadabra").most_common(3)` چی برمی‌گردونه؟
+A: `[("a", 5), ("b", 2), ("r", 2)]` — ۳ عنصر پرتکرار با تعداد.
+
+Q: فرق `set.discard` و `set.remove` چیه؟
+A: `remove(x)` اگه x نباشه KeyError می‌ده. `discard(x)` اگه x نباشه هیچ کاری نمی‌کنه (خطا نمی‌ده).
+
+Q: پایتون چطور برخورد hash collision در dict را مدیریت می‌کنه؟
+A: Open addressing — اسلات‌های بعدی رو تا پیدا شدن اسلات خالی بررسی می‌کنه. وقتی load factor از حدود ۲/۳ بیشتر بشه، جدول بزرگتر می‌شه.
+
+Q: فرق `UserDict` و زیرکلاس مستقیم `dict` چیه؟
+A: `UserDict` با `self.data` کار می‌کنه — `update()` و `__init__()` از overrideهای شما عبور می‌کنن. زیرکلاس `dict` بعضی متدها رو bypass می‌کنه. `UserDict` امن‌تره.
+
+Q: `collections.abc.Mapping` و `MutableMapping` چی هستند؟
+A: ABC برای کلاس‌های dict-like. با پیاده‌سازی ۶ متد core، ۲۰+ متد رایگان می‌گیرید (keys, values, items, get, pop, update, clear).
+
+Q: آیا `dict.keys()` و `dict.items()` از عملیات set پشتیبانی می‌کنن؟
+A: بله — `KeysView` و `ItemsView` پروتکل `Set` را پیاده‌سازی می‌کنن. `d1.keys() & d2.keys()` → کلیدهای مشترک. `d1.items() ^ d2.items()` → آیتم‌های تغییرکرده. `d.values()` پشتیبانی نمی‌کنه.
+
+Q: چطور کلید با min/max مقدار رو در دیکشنری پیدا کنیم؟
+A: `min(prices, key=prices.get)` — از `dict.get` به عنوان تابع key استفاده می‌کنه. برای مرتب‌سازی: `sorted(prices, key=prices.get)`.
+
+Q: چطور یک لیست رو بدون به‌هم‌ریختن ترتیب dedup کنیم؟
+A: `list(dict.fromkeys(items))` — دیکشنری (3.7+) ترتیب درج رو حفظ می‌کنه. برای آیتم‌های غیر hashable از generator با set استفاده کن.
