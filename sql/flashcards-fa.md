@@ -276,3 +276,33 @@ LATERAL join چیست؟ ; زیرپرس‌وجو را به ازای هر سطر q
 
 تفاوت FILTER و CASE-based conditional aggregation چیست؟ ; FILTER خواناتر است و در PostgreSQL ممکن است استراتژی اجرای متفاوتی فعال کند. در عمل هر دو پلن مشابهی دارند — FILTER برای خوانایی، CASE برای سازگاری.
 
+
+---
+
+## Ch 5 — موتورهای ذخیره‌سازی و ساختار داده
+
+storage engine چیست؟ ; لایه‌ای که سازمان‌دهی فیزیکی داده، ایندکس‌ها، تراکنش‌ها و بازیابی را روی دیسک مدیریت می‌کند. از لایه query/planner جدا است. Row-oriented برای OLTP، column-oriented برای OLAP.
+
+چرا ستون‌محورها بهتر از ردیف‌محورها فشرده می‌شوند؟ ; هر ستون یک نوع داده با تکرار بالا ذخیره می‌کند — کدینگ run-length، dictionary و delta خوب جواب می‌دهند. ردیف نوع‌های مختلف و مقادیر متنوع دارد، پس فشرده‌سازی کم بهره می‌برد.
+
+B+tree چیست و چرا اکثر دیتابیس‌ها استفاده می‌کنند؟ ; درخت متوازن چندمسیره که فقط برگ‌ها داده دارند، گره‌های داخلی فقط کلید، و برگ‌ها به‌صورت لیست مرتب به هم وصل‌اند. ارتفاع کم (۲-۴) و لیست برگ‌ها اسکن بازه‌ای را سریع می‌کند. InnoDB، PostgreSQL و SQLite از B+tree استفاده می‌کنند.
+
+کلاستر ایندکس (primary key در InnoDB) چطور کار می‌کند؟ ; ردیف‌های جدول فیزیکی داخل B+tree مرتب‌شده با primary key ذخیره می‌شوند. ایندکس‌های ثانویه به مقدار PK اشاره می‌کنند، پس جستجوی ثانویه = ۲ پیمایش. ORDER BY روی PK تقریباً رایگان است.
+
+چرا PK یکنواخت بهتر از UUID تصادفی در InnoDB است؟ ; کلید یکنواخت لبه راست اضافه می‌شود — بدون page split و fragmentation. UUID تصادفی وسط درخت می‌رود و page split و write amplification ایجاد می‌کند.
+
+LSM tree چیست؟ ; Log-structured merge: نوشتن append-only در memtable حافظه، flush به صورت SSTable مرتب، و ادغام در پس‌زمینه با compaction. بهینه برای بارهای write-heavy (RocksDB، Cassandra، HBase). هزینه: read/space amplification بیشتر.
+
+B-tree یا LSM — کدام برای write-heavy و کدام read-heavy؟ ; LSM برای write-heavy: نوشتن append-only بدون به‌روزرسانی تصادفی درجا. B-tree برای read-heavy و point lookup: read amplification کمتر و تأخیر قابل پیش‌بینی. بر اساس تعادل بار انتخاب کن.
+
+write-ahead logging (WAL) چیست و چرا لازم است؟ ; هر تغییر قبل از به‌روزرسانی فایل داده، اول به یک log ترتیبی append می‌شود. این buffer شدن تنبل را امن می‌کند: در crash با replay کردن log تراکنش‌های commit شده بازیابی می‌شوند. بدون fsync هر page در هر commit، durability می‌دهد.
+
+checkpoint چیست؟ ; نقطه‌ای که page های کثیف به فایل داده flush می‌شوند و WAL کوتاه می‌شود. بازیابی فقط از آخرین checkpoint replay می‌کند و زمان بازیابی را محدود می‌کند.
+
+فرق latch و lock چیست؟ ; Latch: ساختار فیزیکی درون حافظه (page های buffer pool، گره‌های ایندکس)، چند میکروثانیه، یک عملیات، بدون scope تراکنش و بدون تشخیص deadlock. Lock: داده منطقی، تا پایان تراکنش، صف‌بندی شده، با تشخیص deadlock.
+
+STEAL و NO-FORCE در بازیابی یعنی چه؟ ; STEAL = موتور ممکن است page کثیف تراکنش ناکامل را زودتر flush کند (نیاز به undo log). NO-FORCE = موتور همه page کثیف را در commit flush نمی‌کند (به WAL redo اتکا می‌کند). InnoDB و PostgreSQL STEAL + NO-FORCE هستند.
+
+MVCC چطور اجازه می‌دهد خواننده‌ها نویسنده‌ها را بلاک نکنند؟ ; هر تراکنش یک snapshot سازگار با نگه‌داشتن چند نسخه ردیف می‌بیند. خواننده‌ها نسخه قدیمی می‌خوانند؛ نویسنده‌ها نسخه جدید می‌سازند؛ undo log / versioning پاکسازی را مدیریت می‌کند. بدون contention بین خواننده و نویسنده.
+
+hash index چیست و محدودیتش کدام است؟ ; کلید را به offset در یک log append-only نگاشت می‌کند (طراحی Bitcask). point lookup با O(1)، اما اسکن بازه‌ای ندارد و باید در حافظه باشد. مناسب بارهای key-value نقطه‌ای.
