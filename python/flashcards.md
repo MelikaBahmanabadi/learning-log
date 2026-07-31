@@ -188,3 +188,82 @@ A: FIFO queue — `deque` gives O(1) `popleft`. list gives O(n) `pop(0)`. For th
 
 Q: What is a rolling window pattern with zip?
 A: `list(zip(*(seq[i:] for i in range(n))))` — produces n-length tuples sliding over the sequence.
+
+---
+
+## Ch 3: Dicts, Sets & Mapping Structures
+
+Q: How do you create a dict with default values for missing keys?
+A: `d.get("key", "default")` — returns default without KeyError. For automatic defaults: `collections.defaultdict(list)`.
+
+Q: What's the difference between `d.get(k)` and `d.setdefault(k, default)`?
+A: `get` returns default but doesn't modify dict. `setdefault` inserts default if key missing, then returns value. `setdefault` always evaluates default argument (no lazy evaluation).
+
+Q: How does `defaultdict` work?
+A: Takes a factory function. When missing key accessed via `d[key]`, factory is called to produce default: `defaultdict(list)` creates empty list, `defaultdict(int)` creates 0.
+
+Q: What's `collections.Counter`?
+A: Dict subclass for counting hashable objects. `c = Counter("abracadabra")` → counts each char. Has `most_common(n)`, arithmetic (`+`, `-`, `&`, `|`), `elements()`.
+
+Q: How do you merge two dicts (Python 3.9+)?
+A: `merged = d1 | d2` (new dict). `d1 |= d2` (in-place). Later keys win on conflict.
+
+Q: What's the `__missing__` hook?
+A: Method on dict subclass called when `d[key]` raises KeyError. Lets you handle missing keys dynamically: `class AutoDict(dict): def __missing__(self, k): return 0`.
+
+Q: What's `collections.OrderedDict` good for when regular dict is already ordered?
+A: `move_to_end(key)` and order-sensitive equality (`od1 == od2` checks position, regular dict doesn't). Otherwise regular dict (3.7+) suffices.
+
+Q: What's `collections.ChainMap`?
+A: Groups multiple dicts into single view. Lookups search each dict in order. Mutations affect only the first dict. Good for config layering (CLI args > env > defaults).
+
+Q: What types are hashable in Python?
+A: Immutable types: int, float, str, bytes, tuple (if all elements hashable), frozenset. Mutable types (list, set, dict) are NOT hashable. User objects are hashable by default (by id).
+
+Q: Time complexity of `key in dict` vs `key in list`?
+A: `key in dict` — O(1) average (hash table). `key in list` — O(n) (linear scan). Use set/dict for large membership checks.
+
+Q: What's the difference between `set` and `frozenset`?
+A: `set` is mutable (add/remove/discard/update). `frozenset` is immutable and hashable — can be used as dict key or inside another set.
+
+Q: Set operations: union vs intersection vs difference?
+A: `a | b` — union (all elements). `a & b` — intersection (common). `a - b` — difference (in a not b). `a ^ b` — symmetric diff (in either, not both).
+
+Q: How do you check if a is a subset of b?
+A: `a <= b` or `a.issubset(b)`. For proper subset: `a < b`.
+
+Q: What's `MappingProxyType`?
+A: Wraps a dict as read-only. `MappingProxyType({"key": "val"})` — prevents mutation. Useful for exposing internal dicts as API.
+
+Q: What's the danger of using a mutable object as dict key?
+A: If the object mutates after insertion, its hash changes. The dict can't find it anymore (`KeyError`), and the old entry leaks as garbage.
+
+Q: How do you invert a dict (swap keys and values)?
+A: `{v: k for k, v in d.items()}`. If values aren't unique, later keys overwrite earlier ones — use `defaultdict(list)` to collect.
+
+Q: How do you group items from a list of tuples using dict?
+A: `defaultdict(list)` — `groups[lang].append(name)`. Group people by language, files by extension, etc.
+
+Q: What does `Counter("abracadabra").most_common(3)` return?
+A: `[("a", 5), ("b", 2), ("r", 2)]` — top 3 most frequent elements with counts.
+
+Q: What's the difference between `set.discard` and `set.remove`?
+A: `remove(x)` raises KeyError if x missing. `discard(x)` is a no-op if x missing (no error).
+
+Q: How does Python's dict handle hash collisions?
+A: Open addressing — probes next slots until finding empty slot. When load factor exceeds ~2/3, the table resizes to reduce collisions.
+
+Q: What's the difference between `UserDict` and direct `dict` subclassing?
+A: `UserDict` wraps `self.data` dict — `update()` and `__init__()` route through your overrides. `dict` subclass bypasses overrides in some methods. Prefer `UserDict` for safety unless you have specific performance reasons for `dict`.
+
+Q: What's `collections.abc.Mapping` and `MutableMapping`?
+A: ABCs for dict-like classes. Implement 6 core methods (`__getitem__`, `__len__`, `__iter__`, `__contains__`, plus `__setitem__`/`__delitem__` for mutable) → get 20+ methods (keys, values, items, get, pop, update, clear) for free.
+
+Q: Do `dict.keys()` and `dict.items()` support set operations?
+A: Yes — `KeysView` and `ItemsView` implement the `Set` protocol. `d1.keys() & d2.keys()` → common keys. `d1.items() ^ d2.items()` → changed items. `d1.keys() - d2.keys()` → keys in d1 not in d2. `d.values()` does NOT (values may be unhashable).
+
+Q: How do you find the key with min/max value in a dict?
+A: `min(prices, key=prices.get)` — uses `dict.get` as key function. For sorted: `sorted(prices, key=prices.get)`. For (key, value) pairs: `min(prices.items(), key=lambda x: x[1])`.
+
+Q: How do you deduplicate a list while preserving order?
+A: `list(dict.fromkeys(items))` — Python 3.7+ dict preserves insertion order, `fromkeys` drops duplicates. For non-hashable items, use a set-based generator: `seen = set(); [x for x in items if not (x in seen or seen.add(x))]`.
