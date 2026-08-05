@@ -306,3 +306,81 @@ STEAL و NO-FORCE در بازیابی یعنی چه؟ ; STEAL = موتور مم�
 MVCC چطور اجازه می‌دهد خواننده‌ها نویسنده‌ها را بلاک نکنند؟ ; هر تراکنش یک snapshot سازگار با نگه‌داشتن چند نسخه ردیف می‌بیند. خواننده‌ها نسخه قدیمی می‌خوانند؛ نویسنده‌ها نسخه جدید می‌سازند؛ undo log / versioning پاکسازی را مدیریت می‌کند. بدون contention بین خواننده و نویسنده.
 
 hash index چیست و محدودیتش کدام است؟ ; کلید را به offset در یک log append-only نگاشت می‌کند (طراحی Bitcask). point lookup با O(1)، اما اسکن بازه‌ای ندارد و باید در حافظه باشد. مناسب بارهای key-value نقطه‌ای.
+
+---
+
+## Ch 6 — Consistent Hashing
+
+Consistent Hashing چیست و چرا استفاده می‌شود؟ ; کلیدها و نودها را روی یک حلقه هش (hash ring) نگاشت می‌کند. هر کلید به اولین نود در جهت ساعت‌گرد اختصاص می‌یابد. اضافه/حذف نود فقط همسایه‌ها را تحت تأثیر قرار می‌دهد — جابجایی داده‌ها بهینه است. در Dynamo، Cassandra، Riak استفاده می‌شود.
+
+حلقه هش (hash ring) چطور کار می‌کند؟ ; نودها و کلیدها با هش کردن روی دایره قرار می‌گیرند. یک کلید به اولین نود در جهت ساعت‌گرد داده می‌شود. نودهای مجازی (vnodes) توزیع یکنواخت و ریکانفیگ راحت را تضمین می‌کنند.
+
+---
+
+## Ch 6 — Partitioning Strategies
+
+تفاوت پارتیشن‌بندی key-range و hash-based چیست؟ ; Key-range: بر اساس محدوده‌های مرتب کلید (مثلاً ۱-۱۰۰۰ → نود A). range scan می‌شود اما hotspot دارد. Hash: hash(key) % N پارتیشن را تعیین می‌کند. توزیع یکنواخت اما range scan ندارد.
+
+چطور پارتیشن‌ها را هنگام اضافه کردن نود rebalance می‌کنید؟ ; Fixed partitions: بسیاری از پارتیشن‌ها از پیش ساخته شده، زیرمجموعه به نود جدید منتقل می‌شود. Dynamic splitting: پارتیشن‌ها وقتی بزرگ شدند تقسیم می‌شوند. Consistent hashing: فقط داده‌های همسایه‌ها جابجا می‌شوند.
+
+Virtual node (vnode) چیست؟ ; یک نود فیزیکی چندین "توکن" (اسلات) روی حلقه هش擁有 می‌کند. توزیع داده یکنواختر، ریکانفیگ هنگام add/remove راحت‌تر. در Cassandra، Kafka استفاده می‌شود.
+
+---
+
+## Ch 6 — Replication Models
+
+سه مدل replication چیستند؟ ; Single-leader: همه writes → leader → replicas (اسکیل خواندن، ساده). Multi-leader: write به هر leader → replicate به بقیه (چند منطقه‌ای، conflict احتمالی). Leaderless (Dynamo): write به W نود، read از R نود، W+R>N (بسیار available، eventual).
+
+تفاوت replication synchronous و asynchronous چیست؟ ; Sync: تا ack از replica منتظر می‌ماند. پایداری قوی‌تر، latency بالا، اگر replica down باشد block می‌شود. Async: بلافاصله ack می‌دهد. Latency پایین اما replica lag → stale read، احتمال data loss.
+
+---
+
+## Ch 6 — Consensus (Raft)
+
+انتخاب رهبر (leader election) در Raft چطور کار می‌کند؟ ; Followers یک election timeout تصادفی صبر می‌کنند. اگر heartbeat از leader نیاید، candidate می‌شوند، term را افزایش می‌دهند، درخواست vote می‌دهند. اگر اکثریت رأی بدهند → leader می‌شوند. Timeout‌های تصادفی split vote را پیشگیری می‌کند.
+
+Election restriction در Raft چیست؟ ; یک candidate باید log دارد که حداقل به اندازه اکثریت up-to-date باشد (term و index آخرین entry) تا برنده شود. تضمین می‌کند leader جدید همه entryهای committed را دارد.
+
+Log replication در Raft چگونه انجام می‌شود؟ ; Leader entry می‌گیرد → به log خود append می‌کند → AppendEntries RPC به followers می‌فرستد → entry وقتی اکثریت append کنند committed می‌شود → leader روی state machine apply می‌کند → به followers از طریق commit index می‌گوید apply کنند.
+
+---
+
+## Ch 6 — Distributed Transactions
+
+Two-Phase Commit (2PC) چطور کار می‌کند؟ ; Phase 1: coordinator از participants می‌پرسد "can you commit?" → participants منابع را lock می‌کنند، prepare در log می‌نویسند، YES/NO جواب می‌دهند. Phase 2: اگر همه YES → COMMIT به همه؛ اگر هر کدام NO → ABORT به همه.
+
+مشکل 2PC چیست؟ ; Blocking: اگر coordinator بعد از prepare fail کند، participants تا بی‌نهایت block می‌شوند. Coordinator SPOF است. Lockها طول کامل prepare/commit نگه داشته می‌شوند.
+
+Saga pattern چیست؟ ; یک تراکنش توزیع‌شده را به دنباله‌ای از تراکنش‌های محلی می‌شکند، هر کدام با یک compensating action برای rollback. Orchestration: coordinator مرکزی. Choreography: event-driven، coordinator ندارد.
+
+---
+
+## Ch 6 — CAP & PACELC
+
+تئورم CAP چه می‌گوید؟ ; در یک network partition (P)، باید بین Consistency (C) و Availability (A) انتخاب کنید. هر دو نمی‌توانید داشته باشید. فقط در طول partition صدق می‌کند — در حالت عادی هر دو ممکن است.
+
+PACELC چیست؟ ; توسعه CAP: Else (partition نیست)، Latency در برابر Consistency. PC/EC: consistency را اولویت می‌دهد (Spanner، CockroachDB). PA/EL: latency/availability را اولویت می‌دهد (Cassandra، DynamoDB).
+
+---
+
+## Ch 6 — Vector Clocks
+
+Vector Clock چیست؟ ; causality را بین نودها با اختصاص counter به هر نود ردیابی می‌کند. هر version یک vector دارد (مثلاً counter نود A، counter نود B). آپدیت‌های concurrent را تشخیص می‌دهد (وقتی هیچ vector دیگری را dominate نمی‌کند).
+
+چطور با vector clock conflict تشخیص می‌دهید؟ ; اگر vector clock X در حداقل یک نود count بالاتری از Y داشته باشد و Y در حداقل یک نود count بالاتری داشته باشد → concurrent (conflict). اگر یکی همه را dominate کند → happens-before.
+
+---
+
+## Ch 6 — Quorum & Read Repair
+
+شرط quorum در سیستم‌های Dynamo-style چیست؟ W+R > N consistency قوی را تضمین می‌کند. با N=3، W=2، R=2: ۲+۲=۴>۳. یک read به ۲ نود می‌رسد؛ حداقل ۱ آنها آخرین write را دیده است.
+
+Read Repair چیست؟ ; در طول یک read، اگر replicas disagree کنند، reader جدیدترین version را برمی‌گرداند و به replicas قدیمی برمی‌گرداند (write-back). Repairها به صورت lazy در background انجام می‌شوند، نه synchronous.
+
+---
+
+## Ch 6 — Distributed Query Execution
+
+Indexهای ثانویه در دیتابیس sharded چطور مدیریت می‌شوند؟ ; Local index: query به همه shards fan-out می‌شود (scatter-gather). Global index: index بر اساس term پارتیشن‌بندی می‌شود؛ یک shard جواب می‌دهد اما writes به چندین index partition می‌روند.
+
+Broadcast join در برابر shuffle join کی استفاده می‌شود؟ ; Broadcast: یک جدول đủ کوچک است که در حافظه جا شود — به همه نودها فرستاده می‌شود. Shuffle: هر دو جدول بزرگند — با hash(key) redistribute می‌شوند. Shuffle = network I/O بالا، broadcast = network کم اما حافظه.

@@ -21,7 +21,7 @@ Structured study notes for advanced SQL.
 | 3 | [SQL Antipatterns & Better Designs](W3-summary.md) | Antipatterns | 🟢 Done |
 | 4 | [Window Functions & Advanced Queries](W4-summary.md) | Cookbook | 🟢 Done |
 | 5 | [Storage Engines & Data Structures](W5-summary.md) | Database Internals | 🟢 Done |
-| 6 | Distributed Databases | Database Internals, DDIA | 🔜 |
+| 6 | [Distributed Databases](W6-summary.md) | Database Internals, DDIA | 🟢 Done |
 | 7 | Consistency, Transactions & MVCC | DDIA | 🔜 |
 | 8 | Schema Design & Data Modeling | Antipatterns, DDIA | 🔜 |
 | 9 | Query Optimization Deep Dive | Performance Explained | 🔜 |
@@ -32,3 +32,4 @@ Structured study notes for advanced SQL.
 - `W<n>-summary.md` — Weekly summary notes (concepts, examples, interview Q&A)
 - `flashcards.md` — Anki-ready Q&A cards
 - `progress.md` — What's done, what's next
+
