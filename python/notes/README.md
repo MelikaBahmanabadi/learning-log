@@ -31,7 +31,7 @@ Chapter notes for AI Engineer learning journey — Python basics to advanced, OO
 | 3 | [Dicts, Sets & Mapping Structures](W3-summary.md) | F4–5, PC2 | Basic Python: Collections | 🟢 Done |
 | 4 | [Strings, Bytes & Text Processing](W4-summary.md) | F7–9, E3 | Basic Python: String Manipulation | 🟢 Done |
 | 5 | [Functions, Scope & Closures](W5-summary.md) | F6, E5–8, PC7 | Basic Python: Functions | 🟢 Done |
-| 6 | Comprehensions, Lambda & Functional Tools | F2, E5–8, PC1 | Basic Python: Comprehensions, Lambda | 🔜 |
+| 6 | [Comprehensions, Lambda & Functional Tools](W6-summary.md) | F2, E5–8, PC1 | Basic Python: Comprehensions, Lambda | 🟢 Done |
 | 7 | Modules, Packages & Import System | PC7 | Basic Python: Modules & Packages | 🔜 |
 | 8 | File Handling & I/O | CC8–9 | Basic Python: File Handling, I/O | 🔜 |
 
@@ -42,7 +42,7 @@ Chapter notes for AI Engineer learning journey — Python basics to advanced, OO
 | 9 | Python Data Model & Special Methods Deep Dive | F1, F12–14 | Advanced: Magic Methods | 🔜 |
 | 10 | Iterators, Generators & itertools | F15, E6, PC4 | Advanced: Iterators & Generators | 🔜 |
 | 11 | Decorators & Closures Deep Dive | F7, E5–8 | Advanced: Decorators, Closures | 🔜 |
-| 12 | Context Managers with statement | F5 | Advanced: Context Managers | 🔜 |
+| 12 | Context Managers & `with` Statement | F5 | Advanced: Context Managers | 🔜 |
 | 13 | Type Hinting, Generics & Static Analysis | E10–11, PC8 | Advanced: Type Hinting | 🔜 |
 | 14 | Dataclasses, Namedtuples & Data Containers | F5, PC8 | Advanced: Dataclasses | 🔜 |
 | 15 | Memory Management, GIL & Performance | HP1–2, F20 | Advanced: Memory, GIL | 🔜 |
@@ -118,7 +118,7 @@ Chapter notes for AI Engineer learning journey — Python basics to advanced, OO
 
 | Roadmap Section | Chapters | Status |
 | --------------- | -------- | ------ |
-| 1. Basic Python | Ch 1–8 | 🟢 Ch 1–5 done, others 🔜 |
+| 1. Basic Python | Ch 1–8 | 🟢 Ch 1–6 done, others 🔜 |
 | 2. Advanced Python | Ch 9–18 | 🔜 |
 | 3. OOP | Ch 19–23 | 🔜 |
 | 4. DSA | Ch 24–27 | 🔜 |
@@ -136,3 +136,4 @@ Chapter notes for AI Engineer learning journey — Python basics to advanced, OO
 | 16. Linux, Git & DevOps | Ch 43 | 🔜 |
 | 17. Mathematics for AI | Reference | 🔜 |
 | 18. Behavioral & SE | Reference | 🔜 |
+

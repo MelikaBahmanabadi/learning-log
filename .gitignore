@@ -4,3 +4,7 @@
 # Claude Code harness
 .claude/
 .claude.local/
+
+# OpenAI Codex harness
+.codex/
+.codex/*

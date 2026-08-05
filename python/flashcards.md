@@ -368,3 +368,89 @@ A: Functions are objects: assignable (`g = f`), passable as args (`apply(f, x)`)
 
 Q: What's the recursion limit and why does it matter?
 A: Default ~1000 (`sys.getrecursionlimit()`). Exceeding it raises `RecursionError`. Always have a base case; prefer iteration for deep recursion.
+
+## Ch 6: Comprehensions, Lambda & Functional Tools
+
+Q: What's the syntax for a list comprehension?
+A: `[expr for item in iterable if condition]`
+
+Q: How to flatten a 2D list with a list comprehension?
+A: `[x for row in matrix for x in row]` — outer loop first, inner loop second.
+
+Q: What's a dict comprehension?
+A: `{key_expr: value_expr for item in iterable if condition}` — e.g., `{w: len(w) for w in words}`
+
+Q: What's a set comprehension?
+A: `{expr for item in iterable if condition}` — e.g., `{len(w) for w in words}` gives unique lengths.
+
+Q: Difference between list comprehension and generator expression?
+A: List comprehension creates full list in memory. Generator expression (`(...)`) yields lazily — memory efficient for large sequences.
+
+Q: When to use generator expression vs list comprehension?
+A: Generator for large/infinite sequences, chaining, memory-constrained. List for small data, need random access/len/indexing.
+
+Q: How to sum squares using a generator expression?
+A: `sum(x**2 for x in range(10))` — no extra brackets needed as sole argument.
+
+Q: What's the lambda syntax?
+A: `lambda args: expression` — single expression only, no statements.
+
+Q: Lambda with default arguments?
+A: `lambda a, b=2: a * b` — defaults evaluated at definition time.
+
+Q: Common lambda use case?
+A: `key=` functions: `sorted(items, key=lambda x: x[1])` or `map`/`filter` callbacks.
+
+Q: Late-binding gotcha with lambdas in loops?
+A: `funcs = [lambda: i for i in range(3)]` → all return 2. Fix: `lambda i=i: i` binds value as default.
+
+Q: When to prefer `def` over `lambda`?
+A: Named function needed, multiple statements, recursion, docstring/type hints, readability.
+
+Q: What does `map(func, iterable)` do?
+A: Returns iterator applying func to each item: `list(map(str.upper, ["a", "b"]))` → `["A", "B"]`.
+
+Q: What does `filter(func, iterable)` do?
+A: Returns iterator of items where func is truthy: `list(filter(lambda x: x>5, range(10)))` → `[6,7,8,9]`.
+
+Q: What does `functools.reduce(func, iterable)` do?
+A: Cumulatively applies binary function: `reduce(lambda a,b: a+b, [1,2,3])` → 6. With initializer: `reduce(add, [], 0)` → 0.
+
+Q: What's `functools.partial` for?
+A: Fix some arguments of a function: `square = partial(pow, exp=2)` → `square(5)` = 25.
+
+Q: What does `itertools.count` do?
+A: Infinite counter: `zip(count(), ['a','b'])` → `[(0,'a'), (1,'b')]`.
+
+Q: What does `itertools.cycle` do?
+A: Infinite repetition: `islice(cycle([1,2]), 5)` → `[1,2,1,2,1]`.
+
+Q: What does `itertools.islice` do?
+A: Slice an iterator: `islice(range(100), 5, 15)` → `[5..14]` without creating full list.
+
+Q: What does `itertools.chain` do?
+A: Concatenate iterables: `chain([1,2], [3,4])` → `[1,2,3,4]`. `chain.from_iterable(matrix)` flattens.
+
+Q: Difference between `product`, `permutations`, `combinations`?
+A: `product` = Cartesian product (ordered, with replacement). `permutations` = ordered, no replacement. `combinations` = unordered, no replacement.
+
+Q: What does `itertools.groupby` require?
+A: Input must be pre-sorted by the grouping key. Groups consecutive items with same key.
+
+Q: What does `operator.itemgetter` do?
+A: Returns callable extracting item by index/key: `itemgetter(1)(["a","b"])` → `"b"`. Faster than lambda.
+
+Q: What does `operator.attrgetter` do?
+A: Extracts attribute: `attrgetter("age")(person)` → `person.age`. Use with `sorted(key=)`.
+
+Q: What does `operator.methodcaller` do?
+A: Calls method by name: `methodcaller("upper")("hi")` → `"HI"`. `methodcaller("replace"," ","-")("a b")` → `"a-b"`.
+
+Q: How to group by key using dict comprehension?
+A: `{k: [v for k2,v in data if k2==k] for k in set(k for k,_ in data)}` — inefficient for large data.
+
+Q: Better way to group — use `itertools.groupby`?
+A: Sort first, then `{k: [v for _,v in g] for k,g in groupby(sorted_data, key=lambda x: x[0])}`.
+
+Q: What's the `operator` module arithmetic functions?
+A: `add(a,b)`, `mul(a,b)`, `sub(a,b)`, `truediv(a,b)` — use with `reduce`: `reduce(add, [1,2,3])` → 6.
