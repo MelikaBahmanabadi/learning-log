@@ -312,3 +312,81 @@ What do STEAL and NO-FORCE mean in recovery? ; STEAL = engine may flush dirty pa
 How does MVCC let readers not block writers? ; Each transaction sees a consistent snapshot by keeping multiple row versions. Readers read old versions; writers create new versions; undo log / row versioning manages cleanup. No reader/writer lock contention.
 
 What is a hash index and its limitation? ; Maps key to file offset in an append-only log (Bitcask design). O(1) point lookups, but no range scans and must fit in memory. Good for key-value point workloads.
+
+---
+
+## Ch 6 — Consistent Hashing
+
+What is consistent hashing and why is it used? ; Maps keys and nodes onto a hash ring. Each key assigned to the next node clockwise. Adding/removing a node only affects its neighbors — minimizes data movement. Used in Dynamo, Cassandra, Riak.
+
+How does a hash ring work in consistent hashing? ; Nodes and keys are placed on a circle (ring) by hashing. A key goes to the first node clockwise from it. Virtual nodes (vnodes) ensure even distribution and smooth rebalancing.
+
+---
+
+## Ch 6 — Partitioning Strategies
+
+What is the difference between key-range and hash-based partitioning? ; Key-range: partitions by sorted key ranges (e.g., 1-1000 → node A). Enables range scans but hotspots. Hash: hash(key) % N determines partition. Uniform but no range scans.
+
+How do you rebalance partitions when adding a node? ; Fixed partitions: pre-create many partitions, move subsets to new node. Dynamic splitting: split partitions when too large. Consistent hashing: only neighbors' data moves.
+
+What is a virtual node (vnode)? ; A physical node owns multiple "tokens" (slots) on the hash ring. Distributes data more evenly, eases rebalancing on node add/remove. Used in Cassandra, Kafka.
+
+---
+
+## Ch 6 — Replication Models
+
+What are the three replication models? ; Single-leader: all writes → leader → replicas (read scale, simple). Multi-leader: writes to any leader → replicated to others (multi-region, conflict-prone). Leaderless (Dynamo): write to W, read from R, W+R>N (highly available, eventual).
+
+What is the difference between synchronous and asynchronous replication? ; Sync: wait for replica ack before ack to client. Stronger durability, higher latency, blocks on replica failure. Async: ack immediately. Lower latency but replica lag → stale reads, potential data loss.
+
+---
+
+## Ch 6 — Consensus (Raft)
+
+How does Raft leader election work? ; Followers wait a randomized election timeout. If no heartbeat from leader, become candidate, increment term, request votes. If majority votes → leader. Random timeouts prevent split votes.
+
+What is the election restriction in Raft? ; A candidate must have a log at least as up-to-date as the majority (last entry's term + index) to win election. Ensures new leader has all committed entries.
+
+How are logs replicated in Raft? ; Leader receives entry → appends to its log → sends AppendEntries RPCs to followers → entry committed when majority append → leader applies to state machine → tells followers to apply via commit index.
+
+---
+
+## Ch 6 — Distributed Transactions
+
+How does Two-Phase Commit (2PC) work? ; Phase 1: coordinator asks participants "can you commit?" → participants lock resources, write prepare to log, reply YES/NO. Phase 2: if all YES → COMMIT to all; if any NO → ABORT to all.
+
+What is the problem with 2PC? ; Blocking: if coordinator fails after prepare, participants block indefinitely. Coordinator is SPOF. Locks held during entire prepare/commit.
+
+What is the Saga pattern? ; A distributed transaction broken into a sequence of local transactions, each with a compensating action for rollback. Orchestration: central coordinator. Choreography: event-driven, no coordinator.
+
+---
+
+## Ch 6 — CAP & PACELC
+
+What does the CAP theorem state? ; In a network partition (P), you must choose between Consistency (C) and Availability (A). You can't have both. Applies only during partitions — normally you can have both.
+
+What is PACELC? ; Extends CAP: Else (no partition), Latency vs Consistency. PC/EC: prioritize consistency (Spanner, CockroachDB). PA/EL: prioritize latency/availability (Cassandra, DynamoDB).
+
+---
+
+## Ch 6 — Vector Clocks
+
+What is a vector clock? ; Tracks causality across nodes by assigning each node a counter. Each version has a vector (e.g., node A's counter, node B's counter). Detects concurrent updates (when neither vector dominates).
+
+How do you detect conflicts with vector clocks? ; If vector clock X has a higher count than Y in at least one node AND Y has a higher count in at least one node → concurrent (conflict). If one dominates all → happens-before.
+
+---
+
+## Ch 6 — Quorum & Read Repair
+
+What is the quorum requirement in Dynamo-style systems? W+R > N guarantees strong consistency. With N=3, W=2, R=2: 2+2=4>3. A read touches 2 nodes; at least 1 saw the latest write.
+
+What is read repair? ; During a read, if replicas disagree, the reader returns the latest version and writes it back to stale replicas. Repairs happen lazily in the background, not synchronously.
+
+---
+
+## Ch 6 — Distributed Query Execution
+
+How do you handle secondary indexes in a sharded database? ; Local index: fan out query to all shards (scatter-gather). Global index: partition index by indexed term; single shard answers but writes touch multiple index partitions.
+
+When do you use broadcast join vs shuffle join? ; Broadcast: one table small enough to fit in memory — send to all nodes. Shuffle: both tables large — redistribute by hash(key). Shuffle = high network I/O, broadcast = low network but memory pressure.
