@@ -454,3 +454,74 @@ A: Sort first, then `{k: [v for _,v in g] for k,g in groupby(sorted_data, key=la
 
 Q: What's the `operator` module arithmetic functions?
 A: `add(a,b)`, `mul(a,b)`, `sub(a,b)`, `truediv(a,b)` — use with `reduce`: `reduce(add, [1,2,3])` → 6.
+
+## Ch 7: Modules, Packages & Import System
+
+Q: What's the difference between a module and a package?
+A: Module = single .py file. Package = directory with __init__.py (or PEP 420 namespace package) containing modules/subpackages.
+
+Q: When does __init__.py run?
+A: When the package or any submodule is FIRST imported. Runs once per interpreter session.
+
+Q: What does __all__ do in __init__.py?
+A: Defines public API for `from package import *`. Lists names to export. Also documents intended public interface.
+
+Q: Absolute vs relative imports — which to prefer?
+A: Absolute imports (PEP 8) — unambiguous, work everywhere. Relative imports only work inside packages.
+
+Q: Relative import syntax?
+A: `from . import module` (same package), `from .. import module` (parent package), `from ..sub import func`.
+
+Q: What is a namespace package (PEP 420)?
+A: Package WITHOUT __init__.py — multiple directories merge into one namespace. Used for plugins, split distributions.
+
+Q: How to dynamically import a module by string name?
+A: `importlib.import_module("json")` or `importlib.import_module(".module_a", package="mypackage")` for relative.
+
+Q: How to reload a module after editing?
+A: `importlib.reload(module)` — re-executes module code, updates sys.modules.
+
+Q: How to load a module from a file path?
+A: `spec = importlib.util.spec_from_file_location("name", "/path/to/file.py"); module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)`
+
+Q: How to read a data file bundled with a package?
+A: `importlib.resources.files("pkg.data").joinpath("file.json").read_text()` (Python 3.7+). Binary: `.read_bytes()`.
+
+Q: What does pkgutil.get_data() do?
+A: Legacy way to read package data as bytes: `pkgutil.get_data("mypackage", "data/config.json")`.
+
+Q: What does runpy.run_module() do?
+A: Runs a module as __main__ (like `python -m module`). `runpy.run_module("mymodule", run_name="__main__")`.
+
+Q: How does Python find modules?
+A: Searches sys.path: 1) script directory, 2) PYTHONPATH, 3) standard library, 4) site-packages.
+
+Q: How to add a directory to module search path at runtime?
+A: `sys.path.insert(0, "/custom/path")` — but prefer virtual env + `pip install -e .` instead.
+
+Q: What's the `if __name__ == "__main__"` pattern?
+A: Code under this block only runs when file executed directly (`python file.py`), not when imported.
+
+Q: What causes circular imports and how to fix?
+A: Module A imports B, B imports A. Fix: move import inside function (lazy), restructure, or use importlib.
+
+Q: What's the src/ layout for packages?
+A: Package code in `src/mypackage/` — avoids accidental imports from working dir, matches installed structure.
+
+Q: What's pyproject.toml for?
+A: Modern packaging config (PEP 517/518/621). Defines build-system, project metadata, dependencies, optional deps.
+
+Q: How to install package in editable mode?
+A: `pip install -e .` — installs with symlinks, edits reflect immediately without reinstall.
+
+Q: What's a conditional import?
+A: `try: import ujson as json except ImportError: import json` — optional dependency with fallback.
+
+Q: What does leading underscore mean in module names?
+A: `_private` — convention for internal use. Not imported by `from module import *` unless in __all__.
+
+Q: What's __package__ attribute?
+A: Package name of the module. Empty string for top-level scripts. Used by relative imports to resolve.
+
+Q: How to iterate modules in a package?
+A: `pkgutil.iter_modules(package.__path__)` — yields (importer, modname, ispkg) for each module.

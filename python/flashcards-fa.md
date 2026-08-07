@@ -445,3 +445,74 @@ A: اول سورت کن، بعد `{k: [v for _,v in g] for k,g in groupby(sorted
 
 Q: توابع محاسبه‌ای `operator` کدوم‌ان؟
 A: `add(a,b)`, `mul(a,b)`, `sub(a,b)`, `truediv(a,b)` — با `reduce`: `reduce(add, [1,2,3])` → 6.
+
+## فصل ۷: Modules، Packages و Import System
+
+Q: تفاوت module و package چیست؟
+A: Module = فایل .py تکی. Package = دایرکتوری با __init__.py (یا namespace package در PEP 420) که ماژول/زیرپکیج داره.
+
+Q: __init__.py کی اجرا می‌شه؟
+A: وقتی package یا هر submodule اون **اولین بار** import می‌شه. یک بار در هر session interpreter.
+
+Q: __all__ در __init__.py چیکار می‌کنه؟
+A: API عمومی برای `from package import *` تعریف می‌کنه. نام‌های export شده رو لیست می‌کنه. مستندسازی interface هم هست.
+
+Q: Absolute vs relative imports — کدوم ترجیح داده می‌شه؟
+A: Absolute imports (PEP 8) — غیرابهام، همه‌جا کار می‌کنن. Relative imports فقط داخل package کار می‌کنن.
+
+Q: سینتکس relative import؟
+A: `from . import module` (همین package)، `from .. import module` (package والد)، `from ..sub import func`.
+
+Q: Namespace package (PEP 420) چیه؟
+A: Package **بدون** __init__.py — چند دایرکتوری در یک namespace ادغام میشن. برای pluginها، توزیع‌های جدا.
+
+Q: چطور ماژول رو به صورت داینامیک با نام رشته‌ای import کنیم؟
+A: `importlib.import_module("json")` یا `importlib.import_module(".module_a", package="mypackage")` برای relative.
+
+Q: چطور ماژول رو بعد از ویرایش reload کنیم؟
+A: `importlib.reload(module)` — کد ماژول دوباره اجرا می‌شه، sys.modules آپدیت می‌شه.
+
+Q: چطور ماژول رو از مسیر فایل لود کنیم؟
+A: `spec = importlib.util.spec_from_file_location("name", "/path/to/file.py"); module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)`
+
+Q: چطور فایل داده‌ای داخل package رو بخونیم؟
+A: `importlib.resources.files("pkg.data").joinpath("file.json").read_text()` (Python 3.7+). باینری: `.read_bytes()`.
+
+Q: pkgutil.get_data() چیکار می‌کنه؟
+A: روش قدیمی خواندن داده package به صورت bytes: `pkgutil.get_data("mypackage", "data/config.json")`.
+
+Q: runpy.run_module() چیکار می‌کنه؟
+A: ماژول رو به عنوان __main__ اجرا می‌کنه (مثل `python -m module`). `runpy.run_module("mymodule", run_name="__main__")`.
+
+Q: پایتون چطور ماژول‌ها رو پیدا می‌کنه؟
+A: در sys.path جستجو می‌کنه: ۱) دایرکتوری اسکریپت، ۲) PYTHONPATH، ۳) کتابخانه استاندارد، ۴) site-packages.
+
+Q: چطور در runtime دایرکتوری به مسیر جستجو اضافه کنیم؟
+A: `sys.path.insert(0, "/custom/path")` — اما ترجیحا virtual env + `pip install -e .` استفاده کن.
+
+Q: الگو `if __name__ == "__main__"` چیه؟
+A: کد زیرش فقط وقتی فایل مستقیم اجرا بشه (`python file.py`) ران می‌شه، نه وقتی import بشه.
+
+Q: Circular import چرا پیش میاد و چطور FIX میشه؟
+A: ماژول A имپورت B می‌کنه، B هم A رو. FIX: import داخل تابع (lazy)، restructure، یا importlib.
+
+Q: src/ layout برای package چیه؟
+A: کد در `src/mypackage/` — از import تصادفی از working dir جلوگیری می‌کنه، با ساختار نصب‌شده هم‌خوانی داره.
+
+Q: pyproject.toml برای چیه؟
+A: کانفیگ بسته‌بندی مدرن (PEP 517/518/621). build-system، metadata پروژه، dependencies، optional deps تعریف می‌کنه.
+
+Q: چطور package رو در حالت editable نصب کنیم؟
+A: `pip install -e .` — با symlink نصب می‌شه، تغییرات بلافاصله بدون reinstall اعمال میشن.
+
+Q: Conditional import چیه؟
+A: `try: import ujson as json except ImportError: import json` — dependency اختیاری با fallback.
+
+Q: Underscore اول نام در ماژول‌ها یعنی چی؟
+A: `_private` — قرارداد برای استفاده داخلی. با `from module import *` import نمیشه مگر در __all__ باشه.
+
+Q: __package__ attribute چیه؟
+A: نام پکیج ماژول. برای اسکریپت‌های سطح بالا string خالی. برای resolve relative imports استفاده می‌شه.
+
+Q: چطور ماژول‌های داخل یک package رو پیمایش کنیم؟
+A: `pkgutil.iter_modules(package.__path__)` — برای هر ماژول (importer, modname, ispkg) yield می‌کنه.
