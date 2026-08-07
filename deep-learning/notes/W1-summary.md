@@ -249,4 +249,4 @@ A: وقتی نورون‌های ReLU همیشه z<0 داشته باشند، مش
 - Andrew Ng, "Neural Networks and Deep Learning", Coursera (deeplearning.ai), Week 1
 - Goodfellow et al., *Deep Learning*, MIT Press, 2016 — Chapters 6 (MLP), 8 (Optimization)
 - Mueller & Massaron, *Deep Learning for Dummies*, Wiley — Chapter 5 (Activation Functions)
-- Howard & Gugger, *Deep Learning Cookbook* — Fully Connected Layer section
+- Osinga, *Deep Learning Cookbook*, O'Reilly Media, 2018 — Fully Connected Layer section
