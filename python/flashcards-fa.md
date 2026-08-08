@@ -264,3 +264,58 @@ A: `min(prices, key=prices.get)` — از `dict.get` به عنوان تابع ke
 
 Q: چطور یک لیست رو بدون به‌هم‌ریختن ترتیب dedup کنیم؟
 A: `list(dict.fromkeys(items))` — دیکشنری (3.7+) ترتیب درج رو حفظ می‌کنه. برای آیتم‌های غیر hashable از generator با set استفاده کن.
+
+---
+
+## فصل ۴: رشته‌ها، بایت‌ها و پردازش متن
+
+Q: فرق `str`، `bytes` و `bytearray` چیه؟
+A: `str` — کد پوینت‌های یونیکد، immutable. `bytes` — دنباله immutable از اعداد ۰ تا ۲۵۵. `bytearray` — بایت mutable. `b"AB"[0]` → `65` (int)؛ `"AB"[0]` → `"A"`.
+
+Q: چطور بین `str` و `bytes` تبدیل انجام بدیم؟
+A: `s.encode("utf-8")` → بایت (در مرز I/O). `b.decode("utf-8")` → رشته. هیچ‌وقت با `+` یا `==` ترکیبشون نکن — `TypeError`.
+
+Q: وقتی `"é".encode("ascii")` چی می‌شه؟
+A: `UnicodeEncodeError` — é در ASCII نیست. از `errors="replace"`، `"ignore"` یا `"backslashreplace"` استفاده کن. برای decode: `b.decode("utf-8", errors="replace")` کاراکتر � جایگزین می‌کنه.
+
+Q: کد پوینت چیه و `ord()`/`chr()` چطور کار می‌کنن؟
+A: کد پوینت = عدد صحیح شناسایی یک کاراکتر یونیکد. `ord("A")` → ۶۵، `chr(65)` → `"A"`. طول بایت کد پوینت به encoding بستگی داره — "é" در UTF-8 دو بایت، در UTF-16 دو بایت، در UTF-32 چهار بایت.
+
+Q: فرق UTF-8 و UTF-16 چیه؟
+A: UTF-8: ۱ تا ۴ بایت، سازگار با ASCII، استاندارد وب. UTF-16: ۲ تا ۴ بایت، نیاز به BOM برای تشخیص byte order، قدیمی. UTF-32: ثابت ۴ بایت، پرهزینه.
+
+Q: چرا `"café" == "café"` برابر False هست و چطور حلش کنیم؟
+A: متن یکسان ولی کد پوینت‌های متفاوت (é آماده vs e + اکسنت ترکیبی). راه‌حل: `unicodedata.normalize("NFC", s)` — به شکل ترکیبی نرمال می‌کنه. `NFD` تجزیه می‌کنه.
+
+Q: کی به جای `lower()` از `casefold()` استفاده کنیم؟
+A: برای مقایسه بدون حساسیت به حروف بزرگ/کوچک. `casefold()` ß آلمانی رو هم هندل می‌کنه: `"Straße".casefold() == "strasse".casefold()` → True ولی `lower()` → False.
+
+Q: چطور اکسنت‌ها رو از متن حذف کنیم؟
+A: `unicodedata.normalize("NFD", s)` و بعد فیلتر `unicodedata.combining(c)`: `"".join(c for c in NFD(s) if not combining(c))`.
+
+Q: چطور رشته رو بر اساس whitespace یا جداکننده دقیق split کنیم؟
+A: `s.split()` — روی هر run از whitespace، فشرده می‌کنه. `s.split(",")` — جداکننده دقیق. `s.split(",", maxsplit=1)` — محدود. `rsplit` — از راست.
+
+Q: خطر `str.strip(chars)` چیه؟
+A: هر کاراکتری از مجموعه رو حذف می‌کنه، نه یک رشته literal — `"http://".strip("/")` همه `/`های دو سر رو حذف می‌کنه. برای پسوند literal از `removesuffix()` (Python 3.9+) استفاده کن.
+
+Q: فرق `re.match` و `re.search` چیه؟
+A: `match` فقط ابتدای رشته؛ `search` همه‌جا جستجو می‌کنه. بیشتر مواقع از `search` (یا `fullmatch` برای کل رشته) استفاده کن.
+
+Q: چطور گروه‌ها رو با regex بگیریم؟
+A: `(...)` گروه می‌سازه. `re.findall(r"#(\d+)", text)` محتوای گروه رو برمی‌گردونه. `(?P<name>...)` گروه نام‌دار → `m.group("name")` / `m.groupdict()`. `(?:...)` غیرکپچرینگه.
+
+Q: جایگزینی regex با backreference؟
+A: `re.sub(r"(\w+) (\w+)", r"\2 \1", "hello world")` → "world hello". در رشته جایگزین از `\1`، `\2` استفاده کن.
+
+Q: کی از `re.escape` استفاده کنیم؟
+A: وقتی regex از ورودی کاربر/لیترال می‌سازیم: `re.escape("a.b*c")` → `a\.b\*c` — کاراکترهای خاص literal در نظر گرفته می‌شن.
+
+Q: روش درست باز کردن فایل متنی با encoding؟
+A: `open("data.txt", encoding="utf-8")` — همیشه `encoding=` رو صریح بده (به locale اعتماد نکن). باینری: `"rb"`/`"wb"`. برای داده آلوده: `errors="replace"`.
+
+Q: چرا باید بایت‌ها رو در مرز I/O decode کنیم؟
+A: به محض ورود بایت‌ها به برنامه (شبکه، فایل) decode کن و درست قبل از خروج encode کن. منطق برنامه باید در `str` بمونه.
+
+Q: چطور چند whitespace رو به یکی تبدیل کنیم؟
+A: `" ".join(s.split())` — `split()` هر run whitespace رو فشرده می‌کنه، `join` با تک‌فاصله بازسازی می‌کنه.

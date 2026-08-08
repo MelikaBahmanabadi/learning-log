@@ -267,3 +267,64 @@ A: `min(prices, key=prices.get)` — uses `dict.get` as key function. For sorted
 
 Q: How do you deduplicate a list while preserving order?
 A: `list(dict.fromkeys(items))` — Python 3.7+ dict preserves insertion order, `fromkeys` drops duplicates. For non-hashable items, use a set-based generator: `seen = set(); [x for x in items if not (x in seen or seen.add(x))]`.
+
+---
+
+## Ch 4: Strings, Bytes & Text Processing
+
+Q: What's the difference between `str`, `bytes`, and `bytearray`?
+A: `str` — immutable Unicode code points. `bytes` — immutable sequence of ints 0–255. `bytearray` — mutable bytes. `b"AB"[0]` → `65` (int); `"AB"[0]` → `"A"`.
+
+Q: How do you convert between `str` and `bytes`?
+A: `s.encode("utf-8")` → bytes (str → bytes at the I/O edge). `b.decode("utf-8")` → str. Never mix them with `+` or `==` — TypeError.
+
+Q: What happens on `"é".encode("ascii")`?
+A: `UnicodeEncodeError` — é not in ASCII. Use `errors="replace"`, `"ignore"`, or `"backslashreplace"`. For decoding, `b.decode("utf-8", errors="replace")` substitutes the � char.
+
+Q: What is a code point and how do `ord()` / `chr()` work?
+A: Code point = integer identifying a Unicode char. `ord("A")` → 65, `chr(65)` → "A". A code point's byte length depends on encoding — "é" is 2 bytes in UTF-8, 2 in UTF-16, 4 in UTF-32.
+
+Q: What's the difference between UTF-8 and UTF-16?
+A: UTF-8: 1–4 bytes, ASCII-compatible, web default. UTF-16: 2–4 bytes, needs BOM to signal byte order, legacy on Windows/Java. UTF-32: fixed 4 bytes, wasteful.
+
+Q: Why does `"café" == "café"` evaluate to False, and how do you fix it?
+A: Same visual text, different code points (precomposed é vs e + combining accent). Fix with `unicodedata.normalize("NFC", s)` — composes canonically. `NFD` decomposes.
+
+Q: When should you use `casefold()` instead of `lower()`?
+A: For case-insensitive comparison. `casefold()` handles German ß: `"Straße".casefold() == "strasse".casefold()` → True, but `lower()` → False.
+
+Q: How do you strip accents from text?
+A: `unicodedata.normalize("NFD", s)` then filter out `unicodedata.combining(c)` chars: `"".join(c for c in NFD(s) if not combining(c))`.
+
+Q: How do you split a string on any whitespace run vs an exact separator?
+A: `s.split()` — splits on any whitespace run, collapses. `s.split(",")` — exact separator. `s.split(",", maxsplit=1)` — limit. `rsplit` — from the right.
+
+Q: What's the danger of `str.strip(chars)`?
+A: It removes *any char in the set*, not a literal string — `"http://".strip("/")` strips every `/` at both ends. For literal suffixes use `removesuffix()` (Python 3.9+).
+
+Q: What's the difference between `re.match` and `re.search`?
+A: `match` anchors at the start of the string; `search` scans anywhere. Use `search` (or `fullmatch` for whole-string) in most cases.
+
+Q: How do you capture groups with regex?
+A: `(...)` captures. `re.findall(r"#(\d+)", text)` returns group contents. `(?P<name>...)` names a group → `m.group("name")` / `m.groupdict()`. `(?:...)` is non-capturing.
+
+Q: How do you do regex find-and-replace with backreferences?
+A: `re.sub(r"(\w+) (\w+)", r"\2 \1", "hello world")` → "world hello". Use `\1`, `\2` for groups in the replacement string.
+
+Q: When should you use `re.escape`?
+A: When building a regex from user/literal input: `re.escape("a.b*c")` → `a\.b\*c`, so special chars are matched literally.
+
+Q: What's the correct way to open a text file with encoding?
+A: `open("data.txt", encoding="utf-8")` — always pass `encoding=` explicitly (never rely on locale). Binary: `"rb"`/`"wb"`. For dirty data: `errors="replace"`.
+
+Q: Why should you decode bytes at the I/O boundary?
+A: Decode as soon as bytes enter your program (network, file) and encode just before they leave. Keep business logic in `str`, never mix the two.
+
+Q: How do you collapse multiple whitespace runs into one space?
+A: `" ".join(s.split())` — `split()` collapses every whitespace run, `join` rebuilds with single spaces.
+
+Q: How do you collapse multiple whitespace characters?
+A: `" ".join(s.split())` — split() collapses any whitespace run, join reassembles with single spaces.
+
+Q: What's `str.casefold()` vs `str.lower()` for Turkish i?
+A: Both are locale-independent, but `casefold()` is the stronger, Unicode-aware lowercase used for caseless matching — prefer it for `==`-style comparisons.
