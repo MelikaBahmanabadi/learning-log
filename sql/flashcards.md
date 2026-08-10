@@ -329,7 +329,7 @@ What is the difference between key-range and hash-based partitioning? ; Key-rang
 
 How do you rebalance partitions when adding a node? ; Fixed partitions: pre-create many partitions, move subsets to new node. Dynamic splitting: split partitions when too large. Consistent hashing: only neighbors' data moves.
 
-What is a virtual node (vnode)? ; A physical node owns multiple "tokens" (slots) on the hash ring. Distributes data more evenly, eases rebalancing on node add/remove. Used in Cassandra, Kafka.
+What is a virtual node (vnode)? ; A physical node owns multiple "tokens" (slots) on the hash ring. Distributes data more evenly, eases rebalancing on node add/remove. Used in Cassandra, Riak, Dynamo-style systems. (Kafka uses partitions for data distribution, not vnodes.)
 
 ---
 
@@ -379,9 +379,9 @@ How do you detect conflicts with vector clocks? ; If vector clock X has a higher
 
 ## Ch 6 — Quorum & Read Repair
 
-What is the quorum requirement in Dynamo-style systems? W+R > N guarantees strong consistency. With N=3, W=2, R=2: 2+2=4>3. A read touches 2 nodes; at least 1 saw the latest write.
+What is the quorum requirement in Dynamo-style systems? ; W+R > N establishes quorum overlap: when strict read and write quorums are used, every read quorum intersects every write quorum in at least one replica. With N=3, W=2, R=2: 2+2=4>3. This overlap alone does not guarantee linearizability. Stronger consistency guarantees depend on the replication protocol, acknowledgement semantics, version ordering and conflict resolution, read/write coordination, and whether sloppy quorums are used.
 
-What is read repair? ; During a read, if replicas disagree, the reader returns the latest version and writes it back to stale replicas. Repairs happen lazily in the background, not synchronously.
+What is read repair? ; During a read, if replicas disagree, the reader returns the latest version and writes it back to stale replicas. Timing is implementation-dependent: some systems repair synchronously before returning the read result, others repair lazily in the background.
 
 ---
 

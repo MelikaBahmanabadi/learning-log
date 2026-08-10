@@ -323,7 +323,7 @@ Consistent Hashing چیست و چرا استفاده می‌شود؟ ; کلید�
 
 چطور پارتیشن‌ها را هنگام اضافه کردن نود rebalance می‌کنید؟ ; Fixed partitions: بسیاری از پارتیشن‌ها از پیش ساخته شده، زیرمجموعه به نود جدید منتقل می‌شود. Dynamic splitting: پارتیشن‌ها وقتی بزرگ شدند تقسیم می‌شوند. Consistent hashing: فقط داده‌های همسایه‌ها جابجا می‌شوند.
 
-Virtual node (vnode) چیست؟ ; یک نود فیزیکی چندین "توکن" (اسلات) روی حلقه هش擁有 می‌کند. توزیع داده یکنواختر، ریکانفیگ هنگام add/remove راحت‌تر. در Cassandra، Kafka استفاده می‌شود.
+Virtual node (vnode) چیست؟ ; یک نود فیزیکی چندین "توکن" (اسلات) روی حلقه هش دارد. توزیع داده یکنواختر، ریکانفیگ هنگام add/remove راحت‌تر. در Cassandra، Riak و سیستم‌های Dynamo-style استفاده می‌شود. (Kafka از partition برای توزیع داده استفاده می‌کند، نه vnode.)
 
 ---
 
@@ -373,9 +373,9 @@ Vector Clock چیست؟ ; causality را بین نودها با اختصاص cou
 
 ## Ch 6 — Quorum & Read Repair
 
-شرط quorum در سیستم‌های Dynamo-style چیست؟ W+R > N consistency قوی را تضمین می‌کند. با N=3، W=2، R=2: ۲+۲=۴>۳. یک read به ۲ نود می‌رسد؛ حداقل ۱ آنها آخرین write را دیده است.
+شرط quorum در سیستم‌های Dynamo-style چیست؟ ; W+R > N یک **همپوشانی بین quorumها** ایجاد می‌کند: وقتی از quorumهای سخت‌گیرانه استفاده شود، هر read quorum حداقل یک replica مشترک با هر write quorum دارد. با N=3، W=2، R=2: ۲+۲=۴>۳. این همپوشانی به تنهایی linearizability را تضمین نمی‌کند. تضمین قوی‌تر به پروتکل replication، semantics مربوط به acknowledgement، نحوه انتخاب و ترتیب‌دهی versionها و conflict resolution، هماهنگی read/write و استفاده یا عدم استفاده از sloppy quorumها بستگی دارد.
 
-Read Repair چیست؟ ; در طول یک read، اگر replicas disagree کنند، reader جدیدترین version را برمی‌گرداند و به replicas قدیمی برمی‌گرداند (write-back). Repairها به صورت lazy در background انجام می‌شوند، نه synchronous.
+Read Repair چیست؟ ; در طول یک read، اگر replicas disagree کنند، reader جدیدترین version را برمی‌گرداند و به replicas قدیمی برمی‌گرداند (write-back). زمان‌بندی وابسته به پیاده‌سازی است: بعضی سیستم‌ها قبل از برگرداندن نتیجه synchronous تعمیر می‌کنند، بعضی دیگر lazy در background.
 
 ---
 
@@ -383,4 +383,4 @@ Read Repair چیست؟ ; در طول یک read، اگر replicas disagree کنن
 
 Indexهای ثانویه در دیتابیس sharded چطور مدیریت می‌شوند؟ ; Local index: query به همه shards fan-out می‌شود (scatter-gather). Global index: index بر اساس term پارتیشن‌بندی می‌شود؛ یک shard جواب می‌دهد اما writes به چندین index partition می‌روند.
 
-Broadcast join در برابر shuffle join کی استفاده می‌شود؟ ; Broadcast: یک جدول đủ کوچک است که در حافظه جا شود — به همه نودها فرستاده می‌شود. Shuffle: هر دو جدول بزرگند — با hash(key) redistribute می‌شوند. Shuffle = network I/O بالا، broadcast = network کم اما حافظه.
+Broadcast join در برابر shuffle join کی استفاده می‌شود؟ ; Broadcast: یک جدول به‌اندازه‌ی کافی کوچک است که در حافظه جا شود — به همه نودها فرستاده می‌شود. Shuffle: هر دو جدول بزرگند — با hash(key) redistribute می‌شوند. Shuffle = network I/O بالا، broadcast = network کم اما حافظه.
