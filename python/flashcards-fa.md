@@ -190,14 +190,14 @@ A: `list(zip(*(seq[i:] for i in range(n))))` — تاپل‌هایی به طول
 
 ## فصل ۳: دیکشنری‌ها، مجموعه‌ها و ساختارهای نگاشت
 
-Q: چطور یک دیکشنری با مقدار پیش‌فرض برای کلیدهای缺失 بسازیم؟
+Q: چطور یک دیکشنری با مقدار پیش‌فرض برای کلیدهای غیر موجود بسازیم؟
 A: `d.get("key", "default")` — مقدار پیش‌فرض برمی‌گردونه بدون KeyError. برای پیش‌فرض خودکار: `collections.defaultdict(list)`.
 
 Q: فرق `d.get(k)` و `d.setdefault(k, default)` چیه؟
 A: `get` مقدار پیش‌فرض برمی‌گردونه ولی دیکشنری رو تغییر نمی‌ده. `setdefault` اگه کلید نباشه مقدار پیش‌فرض رو اضافه می‌کنه و برمی‌گردونه. `setdefault` همیشه آرگومان پیش‌فرض رو ارزیابی می‌کنه (lazy نیست).
 
 Q: `defaultdict` چطور کار می‌کنه؟
-A: یک تابع factory می‌گیره. وقتی کلید缺失 با `d[key]` صدا زده بشه، factory صدا زده می‌شه تا مقدار پیش‌فرض رو تولید کنه: `defaultdict(list)` لیست خالی، `defaultdict(int)` صفر.
+A: یک تابع factory می‌گیره. وقتی کلید غیر موجود با `d[key]` صدا زده بشه، factory صدا زده می‌شه تا مقدار پیش‌فرض رو تولید کنه: `defaultdict(list)` لیست خالی، `defaultdict(int)` صفر.
 
 Q: `collections.Counter` چیه؟
 A: زیرکلاس dict برای شمارش اشیاء hashable. `c = Counter("abracadabra")` → تعداد هر کاراکتر. متدهای `most_common(n)`، جمع و تفریق (`+`, `-`, `&`, `|`) و `elements()`.
@@ -206,7 +206,7 @@ Q: چطور دو دیکشنری رو ادغام کنیم (Python 3.9+)؟
 A: `merged = d1 | d2` (دیکشنری جدید). `d1 |= d2` (درجا). کلیدهای تکراری از دیکشنری سمت راست برنده می‌شوند.
 
 Q: هوک `__missing__` چیه؟
-A: متدی روی زیرکلاس dict که وقتی `d[key]` KeyError می‌ده صدا زده می‌شه. برای مدیریت کلیدهای缺失: `class AutoDict(dict): def __missing__(self, k): return 0`.
+A: متدی روی زیرکلاس dict که وقتی `d[key]` KeyError می‌ده صدا زده می‌شه. برای مدیریت کلیدهای غیر موجود: `class AutoDict(dict): def __missing__(self, k): return 0`.
 
 Q: `collections.OrderedDict` چه کاربردی داره وقتی خود dict مرتب هست؟
 A: `move_to_end(key)` و مقایسه برابری حساس به ترتیب. در غیر این صورت dict معمولی (3.7+) کافیه.
@@ -257,7 +257,7 @@ Q: `collections.abc.Mapping` و `MutableMapping` چی هستند؟
 A: ABC برای کلاس‌های dict-like. با پیاده‌سازی ۶ متد core، ۲۰+ متد رایگان می‌گیرید (keys, values, items, get, pop, update, clear).
 
 Q: آیا `dict.keys()` و `dict.items()` از عملیات set پشتیبانی می‌کنن؟
-A: بله — `KeysView` و `ItemsView` پروتکل `Set` را پیاده‌سازی می‌کنن. `d1.keys() & d2.keys()` → کلیدهای مشترک. `d1.items() ^ d2.items()` → آیتم‌های تغییرکرده. `d.values()` پشتیبانی نمی‌کنه.
+A: بله — `KeysView` و `ItemsView` پروتکل `Set` را پیاده‌سازی می‌کنن. `d1.keys() & d2.keys()` → کلیدهای مشترک. `d1.items() ^ d2.items()` → آیتم‌های تغییرکرده. `d.values()` پشتیبانی نمی‌کنه. عملیات items نیاز داره همه جفت‌های (کلید، مقدار) hashable باشن — اگه مقداری list یا dict باشه خطا می‌ده.
 
 Q: چطور کلید با min/max مقدار رو در دیکشنری پیدا کنیم؟
 A: `min(prices, key=prices.get)` — از `dict.get` به عنوان تابع key استفاده می‌کنه. برای مرتب‌سازی: `sorted(prices, key=prices.get)`.

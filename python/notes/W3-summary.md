@@ -420,9 +420,13 @@ d1.keys() | d2.keys()        # {"a", "b", "c", "d"} — union
 d1.keys() - d2.keys()        # {"a"} — difference
 d1.keys() ^ d2.keys()        # {"a", "d"} — symmetric diff
 
-# Items also support set ops (items are hashable (key, value) pairs)
+# Items support set ops when (key, value) pairs are hashable
 d1.items() & d2.items()      # {("b", 2)} — common (key, value) pairs
 d1.items() - d2.items()      # {("a", 1), ("c", 3)} — items in d1 not in d2
+
+# Fails if any value is unhashable (e.g. list)
+d3 = {"x": [1, 2]}
+# d1.items() & d3.items()    # TypeError — unhashable type: 'list'
 
 # Values do NOT support set ops (values may not be hashable)
 # d1.values() & d2.values()  # TypeError
@@ -434,7 +438,7 @@ unique_keys = d1.keys() - d2.keys()
 changed = d1.items() ^ d2.items()
 ```
 
-**Note:** Set operations on views work because `KeysView` implements the `Set` protocol — it's both a view and a set.
+**Note:** Set operations on views work because `KeysView` and `ItemsView` implement the `Set` protocol. Items operations require all (key, value) pairs to be hashable — fails if any value is a list, dict, or other unhashable type.
 
 ---
 
@@ -624,9 +628,11 @@ a.isdisjoint(b)           # no common elements?
 ```python
 fs = frozenset([1, 2, 3])
 
-# Immutable — no add/remove/update
-fs.add(4)              # AttributeError
-fs |= {4}              # TypeError
+# Immutable — no in-place mutation methods
+fs.add(4)              # AttributeError — no add/remove/update
+
+# |= works but rebinds, doesn't mutate
+fs |= {4}              # new frozenset {1, 2, 3, 4}, fs rebound
 
 # Hashable — can be dict key or set member
 d = {fs: "value"}      # ✅ frozenset is hashable

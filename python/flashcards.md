@@ -51,7 +51,7 @@ Q: PEP 8 class naming?
 A: `PascalCase`
 
 Q: How to handle mutable default args safely?
-A: Use `None` as default, create fresh mutable inside: `def f(items=None): items = items or []`
+A: Use `None` as default, check with `is None`: `def f(items=None): if items is None: items = []`
 
 Q: What's the LEGB rule?
 A: Local → Enclosing → Global → Built-in — Python's name resolution order.
@@ -260,7 +260,7 @@ Q: What's `collections.abc.Mapping` and `MutableMapping`?
 A: ABCs for dict-like classes. Implement 6 core methods (`__getitem__`, `__len__`, `__iter__`, `__contains__`, plus `__setitem__`/`__delitem__` for mutable) → get 20+ methods (keys, values, items, get, pop, update, clear) for free.
 
 Q: Do `dict.keys()` and `dict.items()` support set operations?
-A: Yes — `KeysView` and `ItemsView` implement the `Set` protocol. `d1.keys() & d2.keys()` → common keys. `d1.items() ^ d2.items()` → changed items. `d1.keys() - d2.keys()` → keys in d1 not in d2. `d.values()` does NOT (values may be unhashable).
+A: Yes — `KeysView` and `ItemsView` implement the `Set` protocol. `d1.keys() & d2.keys()` → common keys. `d1.items() ^ d2.items()` → changed items. `d1.keys() - d2.keys()` → keys in d1 not in d2. `d.values()` does NOT (values may be unhashable). Items operations require all (key, value) pairs hashable — fails if any value is a list or dict.
 
 Q: How do you find the key with min/max value in a dict?
 A: `min(prices, key=prices.get)` — uses `dict.get` as key function. For sorted: `sorted(prices, key=prices.get)`. For (key, value) pairs: `min(prices.items(), key=lambda x: x[1])`.

@@ -107,8 +107,9 @@ f(1, 2, 3)                   # TypeError
 def f(a, b, /, c, *, d):     # / → before it positional-only
     pass
 
-f(1, 2, 3, d=4)              # OK
-f(1, 2, c=3, d=4)            # TypeError — c is positional in signature
+f(1, 2, 3, d=4)              # OK — c passed positionally
+f(1, 2, c=3, d=4)            # OK — c is positional-or-keyword
+f(a=1, b=2, c=3, d=4)        # TypeError — a, b are positional-only
 ```
 
 **Effective Python Item 8:** keyword-only args make calls self-documenting and prevent argument-order bugs. Python 3.8+ supports positional-only with `/`.
