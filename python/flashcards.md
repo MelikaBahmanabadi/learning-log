@@ -127,10 +127,10 @@ Q: What is a slice object?
 A: `slice(start, stop, step)` — created implicitly by `seq[1:5:2]`. Can be named and reused: `s = slice(1, 5, 2); seq[s]`.
 
 Q: What's the time complexity of `list.append()`?
-A: O(1) amortized — list over-allocates capacity so most appends don't reallocate.
+A: O(1) amortized — list over-allocates capacity so most appends don't reallocate. [Source: wiki.python.org/moin/TimeComplexity]
 
 Q: What's the time complexity of `list.pop(0)`?
-A: O(n) — all remaining elements shift left. Use `collections.deque.popleft()` for O(1).
+A: O(n) — all remaining elements shift left. Use `collections.deque.popleft()` for O(1). [Source: wiki.python.org/moin/TimeComplexity]
 
 Q: What is a `namedtuple`?
 A: `namedtuple("Point", ["x", "y"])` creates a tuple subclass with named fields. Access by name (`p.x`) or position (`p[0]`). Immutable, hashable, memory-efficient.
@@ -139,10 +139,10 @@ Q: When to use `array.array` vs `list`?
 A: `array.array` for large homogeneous numeric data — memory-efficient, type-safe, fast binary I/O. List for heterogeneous or mixed-type data.
 
 Q: What does `collections.deque` offer over `list`?
-A: O(1) `append`/`popleft` on BOTH ends. List has O(n) `pop(0)`. deque is ideal for queues, sliding windows, and bounded buffers (`maxlen`).
+A: O(1) `append`/`popleft` on BOTH ends. List has O(n) `pop(0)`. deque is ideal for queues, sliding windows, and bounded buffers (`maxlen`). [Source: docs.python.org/3/library/collections.html#collections.deque]
 
 Q: How does `bisect.insort` work?
-A: Finds insertion point via binary search (O(log n)), then inserts (O(n) shift). Keeps list sorted.
+A: Finds insertion point via binary search (O(log n)), then inserts (O(n) shift). Keeps list sorted. [Source: docs.python.org/3/library/bisect.html]
 
 Q: What does `bisect.bisect_left` vs `bisect.bisect` differ on?
 A: `bisect_left` returns leftmost insertion point (before existing equal values). `bisect` returns rightmost (after equal values).
@@ -200,10 +200,10 @@ Q: What's the difference between `d.get(k)` and `d.setdefault(k, default)`?
 A: `get` returns default but doesn't modify dict. `setdefault` inserts default if key missing, then returns value. `setdefault` always evaluates default argument (no lazy evaluation).
 
 Q: How does `defaultdict` work?
-A: Takes a factory function. When missing key accessed via `d[key]`, factory is called to produce default: `defaultdict(list)` creates empty list, `defaultdict(int)` creates 0.
+A: Takes a factory function. When missing key accessed via `d[key]`, factory is called to produce default: `defaultdict(list)` creates empty list, `defaultdict(int)` creates 0. [Source: docs.python.org/3/library/collections.html#collections.defaultdict]
 
 Q: What's `collections.Counter`?
-A: Dict subclass for counting hashable objects. `c = Counter("abracadabra")` → counts each char. Has `most_common(n)`, arithmetic (`+`, `-`, `&`, `|`), `elements()`.
+A: Dict subclass for counting hashable objects. `c = Counter("abracadabra")` → counts each char. Has `most_common(n)`, arithmetic (`+`, `-`, `&`, `|`), `elements()`. [Source: docs.python.org/3/library/collections.html#collections.Counter]
 
 Q: How do you merge two dicts (Python 3.9+)?
 A: `merged = d1 | d2` (new dict). `d1 |= d2` (in-place). Later keys win on conflict.
@@ -212,16 +212,16 @@ Q: What's the `__missing__` hook?
 A: Method on dict subclass called when `d[key]` raises KeyError. Lets you handle missing keys dynamically: `class AutoDict(dict): def __missing__(self, k): return 0`.
 
 Q: What's `collections.OrderedDict` good for when regular dict is already ordered?
-A: `move_to_end(key)` and order-sensitive equality (`od1 == od2` checks position, regular dict doesn't). Otherwise regular dict (3.7+) suffices.
+A: `move_to_end(key)` and order-sensitive equality (`od1 == od2` checks position, regular dict doesn't). Otherwise regular dict (3.7+) suffices. [Source: docs.python.org/3/library/collections.html#collections.OrderedDict]
 
 Q: What's `collections.ChainMap`?
-A: Groups multiple dicts into single view. Lookups search each dict in order. Mutations affect only the first dict. Good for config layering (CLI args > env > defaults).
+A: Groups multiple dicts into single view. Lookups search each dict in order. Mutations affect only the first dict. Good for config layering (CLI args > env > defaults). [Source: docs.python.org/3/library/collections.html#collections.ChainMap]
 
 Q: What types are hashable in Python?
 A: Immutable types: int, float, str, bytes, tuple (if all elements hashable), frozenset. Mutable types (list, set, dict) are NOT hashable. User objects are hashable by default (by id).
 
 Q: Time complexity of `key in dict` vs `key in list`?
-A: `key in dict` — O(1) average (hash table). `key in list` — O(n) (linear scan). Use set/dict for large membership checks.
+A: `key in dict` — O(1) average (hash table). `key in list` — O(n) (linear scan). Use set/dict for large membership checks. [Source: wiki.python.org/moin/TimeComplexity]
 
 Q: What's the difference between `set` and `frozenset`?
 A: `set` is mutable (add/remove/discard/update). `frozenset` is immutable and hashable — can be used as dict key or inside another set.
@@ -233,7 +233,7 @@ Q: How do you check if a is a subset of b?
 A: `a <= b` or `a.issubset(b)`. For proper subset: `a < b`.
 
 Q: What's `MappingProxyType`?
-A: Wraps a dict as read-only. `MappingProxyType({"key": "val"})` — prevents mutation. Useful for exposing internal dicts as API.
+A: Wraps a dict as read-only. `MappingProxyType({"key": "val"})` — prevents mutation. Useful for exposing internal dicts as API. [Source: docs.python.org/3/library/types.html#types.MappingProxyType]
 
 Q: What's the danger of using a mutable object as dict key?
 A: If the object mutates after insertion, its hash changes. The dict can't find it anymore (`KeyError`), and the old entry leaks as garbage.
@@ -251,13 +251,13 @@ Q: What's the difference between `set.discard` and `set.remove`?
 A: `remove(x)` raises KeyError if x missing. `discard(x)` is a no-op if x missing (no error).
 
 Q: How does Python's dict handle hash collisions?
-A: Open addressing — probes next slots until finding empty slot. When load factor exceeds ~2/3, the table resizes to reduce collisions.
+A: Open addressing — probes next slots until finding empty slot. When load factor exceeds ~2/3, the table resizes to reduce collisions. [Source: CPython Objects/dictobject.c, USABLE_FRACTION macro]
 
 Q: What's the difference between `UserDict` and direct `dict` subclassing?
-A: `UserDict` wraps `self.data` dict — `update()` and `__init__()` route through your overrides. `dict` subclass bypasses overrides in some methods. Prefer `UserDict` for safety unless you have specific performance reasons for `dict`.
+A: `UserDict` wraps `self.data` dict — `update()` and `__init__()` route through your overrides. `dict` subclass bypasses overrides in some methods. Prefer `UserDict` for safety unless you have specific performance reasons for `dict`. [Source: docs.python.org/3/library/collections.html#collections.UserDict]
 
 Q: What's `collections.abc.Mapping` and `MutableMapping`?
-A: ABCs for dict-like classes. Implement 6 core methods (`__getitem__`, `__len__`, `__iter__`, `__contains__`, plus `__setitem__`/`__delitem__` for mutable) → get 20+ methods (keys, values, items, get, pop, update, clear) for free.
+A: ABCs for dict-like classes. Implement 6 core methods (`__getitem__`, `__len__`, `__iter__`, `__contains__`, plus `__setitem__`/`__delitem__` for mutable) → get 20+ methods (keys, values, items, get, pop, update, clear) for free. [Source: docs.python.org/3/library/collections.abc.html]
 
 Q: Do `dict.keys()` and `dict.items()` support set operations?
 A: Yes — `KeysView` and `ItemsView` implement the `Set` protocol. `d1.keys() & d2.keys()` → common keys. `d1.items() ^ d2.items()` → changed items. `d1.keys() - d2.keys()` → keys in d1 not in d2. `d.values()` does NOT (values may be unhashable). Items operations require all (key, value) pairs hashable — fails if any value is a list or dict.
@@ -266,7 +266,7 @@ Q: How do you find the key with min/max value in a dict?
 A: `min(prices, key=prices.get)` — uses `dict.get` as key function. For sorted: `sorted(prices, key=prices.get)`. For (key, value) pairs: `min(prices.items(), key=lambda x: x[1])`.
 
 Q: How do you deduplicate a list while preserving order?
-A: `list(dict.fromkeys(items))` — Python 3.7+ dict preserves insertion order, `fromkeys` drops duplicates. For non-hashable items, use a set-based generator: `seen = set(); [x for x in items if not (x in seen or seen.add(x))]`.
+A: `list(dict.fromkeys(items))` — Python 3.7+ dict preserves insertion order, `fromkeys` drops duplicates. For non-hashable items, use a set-based generator: `seen = set(); [x for x in items if not (x in seen or seen.add(x))]`. [Source: PEP 468 for ordered dict, docs.python.org/3/library/stdtypes.html#dict.fromkeys]
 
 ---
 
@@ -285,13 +285,13 @@ Q: What is a code point and how do `ord()` / `chr()` work?
 A: Code point = integer identifying a Unicode char. `ord("A")` → 65, `chr(65)` → "A". A code point's byte length depends on encoding — "é" is 2 bytes in UTF-8, 2 in UTF-16, 4 in UTF-32.
 
 Q: What's the difference between UTF-8 and UTF-16?
-A: UTF-8: 1–4 bytes, ASCII-compatible, web default. UTF-16: 2–4 bytes, needs BOM to signal byte order, legacy on Windows/Java. UTF-32: fixed 4 bytes, wasteful.
+A: UTF-8: 1–4 bytes, ASCII-compatible, web default. UTF-16: 2–4 bytes, needs BOM to signal byte order, legacy on Windows/Java. UTF-32: fixed 4 bytes, wasteful. [Source: Unicode Standard, Section 3.9]
 
 Q: Why does `"café" == "café"` evaluate to False, and how do you fix it?
-A: Same visual text, different code points (precomposed é vs e + combining accent). Fix with `unicodedata.normalize("NFC", s)` — composes canonically. `NFD` decomposes.
+A: Same visual text, different code points (precomposed é vs e + combining accent). Fix with `unicodedata.normalize("NFC", s)` — composes canonically. `NFD` decomposes. [Source: unicode.org/reports/tr15]
 
 Q: When should you use `casefold()` instead of `lower()`?
-A: For case-insensitive comparison. `casefold()` handles German ß: `"Straße".casefold() == "strasse".casefold()` → True, but `lower()` → False.
+A: For case-insensitive comparison. `casefold()` handles German ß: `"Straße".casefold() == "strasse".casefold()` → True, but `lower()` → False. [Source: Unicode Standard, Section 3.13]
 
 Q: How do you strip accents from text?
 A: `unicodedata.normalize("NFD", s)` then filter out `unicodedata.combining(c)` chars: `"".join(c for c in NFD(s) if not combining(c))`.

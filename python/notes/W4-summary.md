@@ -19,6 +19,8 @@
 
 ## 4.1 str vs bytes vs bytearray
 
+> **Sources**: [Unicode Standard, Section 3.9](https://unicode.org/versions/latest/ch03.pdf) for encoding forms; [docs.python.org/3/library/stdtypes.html#text-sequence-type-str](https://docs.python.org/3/library/stdtypes.html#text-sequence-type-str)
+
 Python has three text-ish types:
 
 ```python
@@ -150,6 +152,8 @@ b"\xef\xbb\xbf".decode("utf-8")  # '﻿'
 ---
 
 ## 4.4 Normalization & Casefold
+
+> **Sources**: [Unicode Standard Annex #15](https://unicode.org/reports/tr15/) for normalization; [Unicode Standard, Section 3.13](https://unicode.org/versions/latest/ch03.pdf) for case folding
 
 ```python
 # Unicode normalization: canonically equivalent sequences

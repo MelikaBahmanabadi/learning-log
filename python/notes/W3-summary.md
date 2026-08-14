@@ -27,6 +27,11 @@
 
 Python's dict is a **hash table** — O(1) average for get/set/delete. In Python 3.7+ dicts preserve **insertion order** (language guarantee, not just CPython).
 
+> **Sources**:
+> - O(1) complexity: [wiki.python.org/moin/TimeComplexity](https://wiki.python.org/moin/TimeComplexity)
+> - Insertion order guarantee: [PEP 468](https://peps.python.org/pep-0468/) (Python 3.7+)
+> - Hash table implementation: [CPython Objects/dictobject.c](https://github.com/python/cpython/blob/main/Objects/dictobject.c)
+
 ### Creation
 
 ```python
@@ -199,6 +204,8 @@ d["3"]          # KeyError
 
 ## 3.3 defaultdict
 
+> **Source**: [docs.python.org/3/library/collections.html#collections.defaultdict](https://docs.python.org/3/library/collections.html#collections.defaultdict)
+
 ```python
 from collections import defaultdict
 
@@ -240,6 +247,8 @@ for word in ["a", "b", "a", "c", "b", "a"]:
 ---
 
 ## 3.4 collections.Counter
+
+> **Source**: [docs.python.org/3/library/collections.html#collections.Counter](https://docs.python.org/3/library/collections.html#collections.Counter)
 
 A `Counter` is a dict subclass for counting hashable objects.
 
@@ -283,6 +292,8 @@ list(c.elements())       # all elements with repeats
 
 ## 3.5 collections.OrderedDict
 
+> **Source**: [docs.python.org/3/library/collections.html#collections.OrderedDict](https://docs.python.org/3/library/collections.html#collections.OrderedDict)
+
 Preserves insertion order (like regular dict since Python 3.7), but adds methods.
 
 ```python
@@ -317,6 +328,8 @@ od1 == od2            # False — order matters for OrderedDict
 
 ## 3.6 collections.ChainMap
 
+> **Source**: [docs.python.org/3/library/collections.html#collections.ChainMap](https://docs.python.org/3/library/collections.html#collections.ChainMap)
+
 ChainMap groups multiple dicts into a single view. Lookups search each dict in order.
 
 ```python
@@ -343,6 +356,8 @@ del config["language"]      # removed from runtime (KeyError if not there)
 ---
 
 ## 3.7 UserDict — Easier Dict Subclassing
+
+> **Source**: [docs.python.org/3/library/collections.html#collections.UserDict](https://docs.python.org/3/library/collections.html#collections.UserDict)
 
 Subclassing `dict` directly can cause issues — if you override `__setitem__`, methods like `update` and `setdefault` bypass it. `collections.UserDict` wraps an internal `dict` (`self.data`) and routes all operations through your overrides.
 
@@ -512,6 +527,8 @@ Python dict is a **hash table**:
 3. If slot empty → store (key, value) pair
 4. If slot occupied → **open addressing**: probe next slot
 5. Load factor ≈ 2/3 → resize when exceeded
+
+> **Source**: [CPython Objects/dictobject.c](https://github.com/python/cpython/blob/main/Objects/dictobject.c) — `lookdict()` function and `USABLE_FRACTION` macro. Also see Raymond Hettinger's [python-dev post](https://mail.python.org/pipermail/python-dev/2012-December/123028.html) on dict implementation.
 
 ```python
 # Which types are hashable?
