@@ -28,9 +28,9 @@ Chapter notes for AI Engineer learning journey — Python basics to advanced, OO
 | -- | ------- | ----- | ------- | ------ |
 | 1 | [Python Basics & Environment](W1-summary.md) | F1, E1–4, CC2–3, PC1 | Basic Python | 🟢 Done |
 | 2 | [Sequences, Lists, Tuples & Slicing](W2-summary.md) | F2–3, PC1 | Basic Python: Collections | 🟢 Done |
-| 3 | Dicts, Sets & Mapping Structures | F4–5, PC2 | Basic Python: Collections | 🔜 |
-| 4 | Strings, Bytes & Text Processing | F7–9, E3 | Basic Python: String Manipulation | 🔜 |
-| 5 | Functions, Scope & Closures | F6, E5–8, PC7 | Basic Python: Functions | 🔜 |
+| 3 | [Dicts, Sets & Mapping Structures](W3-summary.md) | F4–5, PC2 | Basic Python: Collections | 🟢 Done |
+| 4 | [Strings, Bytes & Text Processing](W4-summary.md) | F7–9, E3 | Basic Python: String Manipulation | 🟢 Done |
+| 5 | [Functions, Scope & Closures](W5-summary.md) | F6, E5–8, PC7 | Basic Python: Functions | 🟢 Done |
 | 6 | Comprehensions, Lambda & Functional Tools | F2, E5–8, PC1 | Basic Python: Comprehensions, Lambda | 🔜 |
 | 7 | Modules, Packages & Import System | PC7 | Basic Python: Modules & Packages | 🔜 |
 | 8 | File Handling & I/O | CC8–9 | Basic Python: File Handling, I/O | 🔜 |
@@ -118,7 +118,7 @@ Chapter notes for AI Engineer learning journey — Python basics to advanced, OO
 
 | Roadmap Section | Chapters | Status |
 | --------------- | -------- | ------ |
-| 1. Basic Python | Ch 1–8 | 🟢 Ch1 done, others 🔜 |
+| 1. Basic Python | Ch 1–8 | 🟢 Ch 1–5 done, others 🔜 |
 | 2. Advanced Python | Ch 9–18 | 🔜 |
 | 3. OOP | Ch 19–23 | 🔜 |
 | 4. DSA | Ch 24–27 | 🔜 |

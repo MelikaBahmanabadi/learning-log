@@ -7,9 +7,9 @@
 | -- | ------- | ------ | ----- | ------- |
 | 1 | Python Basics & Environment | 🟢 Done | F1, E1–4, CC2–3 | Basic Python |
 | 2 | Sequences, Lists, Tuples & Slicing | 🟢 Done | F2–3, PC1 | Collections |
-| 3 | Dicts, Sets & Mapping Structures | 🔜 | F4–5, PC2 | Collections |
-| 4 | Strings, Bytes & Text Processing | 🔜 | F7–9, E3 | String Manipulation |
-| 5 | Functions, Scope & Closures | 🔜 | F6, E5–8, PC7 | Functions |
+| 3 | Dicts, Sets & Mapping Structures | 🟢 Done | F4–5, PC2 | Collections |
+| 4 | Strings, Bytes & Text Processing | 🟢 Done | F7–9, E3 | String Manipulation |
+| 5 | Functions, Scope & Closures | 🟢 Done | F6, E5–8, PC7 | Functions |
 | 6 | Comprehensions, Lambda & Functional Tools | 🔜 | F2, E5–8, PC1 | Comprehensions |
 | 7 | Modules, Packages & Import System | 🔜 | PC7 | Modules & Packages |
 | 8 | File Handling & I/O | 🔜 | CC8–9 | File Handling, I/O |
