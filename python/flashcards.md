@@ -51,7 +51,7 @@ Q: PEP 8 class naming?
 A: `PascalCase`
 
 Q: How to handle mutable default args safely?
-A: Use `None` as default, check with `is None`: `def f(items=None): if items is None: items = []`
+A: Use `None` as default, create fresh mutable inside: `def f(items=None): items = items or []`
 
 Q: What's the LEGB rule?
 A: Local → Enclosing → Global → Built-in — Python's name resolution order.
@@ -127,10 +127,10 @@ Q: What is a slice object?
 A: `slice(start, stop, step)` — created implicitly by `seq[1:5:2]`. Can be named and reused: `s = slice(1, 5, 2); seq[s]`.
 
 Q: What's the time complexity of `list.append()`?
-A: O(1) amortized — list over-allocates capacity so most appends don't reallocate. [Source: wiki.python.org/moin/TimeComplexity]
+A: O(1) amortized — list over-allocates capacity so most appends don't reallocate.
 
 Q: What's the time complexity of `list.pop(0)`?
-A: O(n) — all remaining elements shift left. Use `collections.deque.popleft()` for O(1). [Source: wiki.python.org/moin/TimeComplexity]
+A: O(n) — all remaining elements shift left. Use `collections.deque.popleft()` for O(1).
 
 Q: What is a `namedtuple`?
 A: `namedtuple("Point", ["x", "y"])` creates a tuple subclass with named fields. Access by name (`p.x`) or position (`p[0]`). Immutable, hashable, memory-efficient.
@@ -139,10 +139,10 @@ Q: When to use `array.array` vs `list`?
 A: `array.array` for large homogeneous numeric data — memory-efficient, type-safe, fast binary I/O. List for heterogeneous or mixed-type data.
 
 Q: What does `collections.deque` offer over `list`?
-A: O(1) `append`/`popleft` on BOTH ends. List has O(n) `pop(0)`. deque is ideal for queues, sliding windows, and bounded buffers (`maxlen`). [Source: docs.python.org/3/library/collections.html#collections.deque]
+A: O(1) `append`/`popleft` on BOTH ends. List has O(n) `pop(0)`. deque is ideal for queues, sliding windows, and bounded buffers (`maxlen`).
 
 Q: How does `bisect.insort` work?
-A: Finds insertion point via binary search (O(log n)), then inserts (O(n) shift). Keeps list sorted. [Source: docs.python.org/3/library/bisect.html]
+A: Finds insertion point via binary search (O(log n)), then inserts (O(n) shift). Keeps list sorted.
 
 Q: What does `bisect.bisect_left` vs `bisect.bisect` differ on?
 A: `bisect_left` returns leftmost insertion point (before existing equal values). `bisect` returns rightmost (after equal values).
@@ -200,10 +200,10 @@ Q: What's the difference between `d.get(k)` and `d.setdefault(k, default)`?
 A: `get` returns default but doesn't modify dict. `setdefault` inserts default if key missing, then returns value. `setdefault` always evaluates default argument (no lazy evaluation).
 
 Q: How does `defaultdict` work?
-A: Takes a factory function. When missing key accessed via `d[key]`, factory is called to produce default: `defaultdict(list)` creates empty list, `defaultdict(int)` creates 0. [Source: docs.python.org/3/library/collections.html#collections.defaultdict]
+A: Takes a factory function. When missing key accessed via `d[key]`, factory is called to produce default: `defaultdict(list)` creates empty list, `defaultdict(int)` creates 0.
 
 Q: What's `collections.Counter`?
-A: Dict subclass for counting hashable objects. `c = Counter("abracadabra")` → counts each char. Has `most_common(n)`, arithmetic (`+`, `-`, `&`, `|`), `elements()`. [Source: docs.python.org/3/library/collections.html#collections.Counter]
+A: Dict subclass for counting hashable objects. `c = Counter("abracadabra")` → counts each char. Has `most_common(n)`, arithmetic (`+`, `-`, `&`, `|`), `elements()`.
 
 Q: How do you merge two dicts (Python 3.9+)?
 A: `merged = d1 | d2` (new dict). `d1 |= d2` (in-place). Later keys win on conflict.
@@ -212,16 +212,16 @@ Q: What's the `__missing__` hook?
 A: Method on dict subclass called when `d[key]` raises KeyError. Lets you handle missing keys dynamically: `class AutoDict(dict): def __missing__(self, k): return 0`.
 
 Q: What's `collections.OrderedDict` good for when regular dict is already ordered?
-A: `move_to_end(key)` and order-sensitive equality (`od1 == od2` checks position, regular dict doesn't). Otherwise regular dict (3.7+) suffices. [Source: docs.python.org/3/library/collections.html#collections.OrderedDict]
+A: `move_to_end(key)` and order-sensitive equality (`od1 == od2` checks position, regular dict doesn't). Otherwise regular dict (3.7+) suffices.
 
 Q: What's `collections.ChainMap`?
-A: Groups multiple dicts into single view. Lookups search each dict in order. Mutations affect only the first dict. Good for config layering (CLI args > env > defaults). [Source: docs.python.org/3/library/collections.html#collections.ChainMap]
+A: Groups multiple dicts into single view. Lookups search each dict in order. Mutations affect only the first dict. Good for config layering (CLI args > env > defaults).
 
 Q: What types are hashable in Python?
 A: Immutable types: int, float, str, bytes, tuple (if all elements hashable), frozenset. Mutable types (list, set, dict) are NOT hashable. User objects are hashable by default (by id).
 
 Q: Time complexity of `key in dict` vs `key in list`?
-A: `key in dict` — O(1) average (hash table). `key in list` — O(n) (linear scan). Use set/dict for large membership checks. [Source: wiki.python.org/moin/TimeComplexity]
+A: `key in dict` — O(1) average (hash table). `key in list` — O(n) (linear scan). Use set/dict for large membership checks.
 
 Q: What's the difference between `set` and `frozenset`?
 A: `set` is mutable (add/remove/discard/update). `frozenset` is immutable and hashable — can be used as dict key or inside another set.
@@ -233,7 +233,7 @@ Q: How do you check if a is a subset of b?
 A: `a <= b` or `a.issubset(b)`. For proper subset: `a < b`.
 
 Q: What's `MappingProxyType`?
-A: Wraps a dict as read-only. `MappingProxyType({"key": "val"})` — prevents mutation. Useful for exposing internal dicts as API. [Source: docs.python.org/3/library/types.html#types.MappingProxyType]
+A: Wraps a dict as read-only. `MappingProxyType({"key": "val"})` — prevents mutation. Useful for exposing internal dicts as API.
 
 Q: What's the danger of using a mutable object as dict key?
 A: If the object mutates after insertion, its hash changes. The dict can't find it anymore (`KeyError`), and the old entry leaks as garbage.
@@ -251,22 +251,22 @@ Q: What's the difference between `set.discard` and `set.remove`?
 A: `remove(x)` raises KeyError if x missing. `discard(x)` is a no-op if x missing (no error).
 
 Q: How does Python's dict handle hash collisions?
-A: Open addressing — probes next slots until finding empty slot. When load factor exceeds ~2/3, the table resizes to reduce collisions. [Source: CPython Objects/dictobject.c, USABLE_FRACTION macro]
+A: Open addressing — probes next slots until finding empty slot. When load factor exceeds ~2/3, the table resizes to reduce collisions.
 
 Q: What's the difference between `UserDict` and direct `dict` subclassing?
-A: `UserDict` wraps `self.data` dict — `update()` and `__init__()` route through your overrides. `dict` subclass bypasses overrides in some methods. Prefer `UserDict` for safety unless you have specific performance reasons for `dict`. [Source: docs.python.org/3/library/collections.html#collections.UserDict]
+A: `UserDict` wraps `self.data` dict — `update()` and `__init__()` route through your overrides. `dict` subclass bypasses overrides in some methods. Prefer `UserDict` for safety unless you have specific performance reasons for `dict`.
 
 Q: What's `collections.abc.Mapping` and `MutableMapping`?
-A: ABCs for dict-like classes. Implement 6 core methods (`__getitem__`, `__len__`, `__iter__`, `__contains__`, plus `__setitem__`/`__delitem__` for mutable) → get 20+ methods (keys, values, items, get, pop, update, clear) for free. [Source: docs.python.org/3/library/collections.abc.html]
+A: ABCs for dict-like classes. Implement 6 core methods (`__getitem__`, `__len__`, `__iter__`, `__contains__`, plus `__setitem__`/`__delitem__` for mutable) → get 20+ methods (keys, values, items, get, pop, update, clear) for free.
 
 Q: Do `dict.keys()` and `dict.items()` support set operations?
-A: Yes — `KeysView` and `ItemsView` implement the `Set` protocol. `d1.keys() & d2.keys()` → common keys. `d1.items() ^ d2.items()` → changed items. `d1.keys() - d2.keys()` → keys in d1 not in d2. `d.values()` does NOT (values may be unhashable). Items operations require all (key, value) pairs hashable — fails if any value is a list or dict.
+A: Yes — `KeysView` and `ItemsView` implement the `Set` protocol. `d1.keys() & d2.keys()` → common keys. `d1.items() ^ d2.items()` → changed items. `d1.keys() - d2.keys()` → keys in d1 not in d2. `d.values()` does NOT (values may be unhashable).
 
 Q: How do you find the key with min/max value in a dict?
 A: `min(prices, key=prices.get)` — uses `dict.get` as key function. For sorted: `sorted(prices, key=prices.get)`. For (key, value) pairs: `min(prices.items(), key=lambda x: x[1])`.
 
 Q: How do you deduplicate a list while preserving order?
-A: `list(dict.fromkeys(items))` — Python 3.7+ dict preserves insertion order, `fromkeys` drops duplicates. For non-hashable items, use a set-based generator: `seen = set(); [x for x in items if not (x in seen or seen.add(x))]`. [Source: PEP 468 for ordered dict, docs.python.org/3/library/stdtypes.html#dict.fromkeys]
+A: `list(dict.fromkeys(items))` — Python 3.7+ dict preserves insertion order, `fromkeys` drops duplicates. For non-hashable items, use a set-based generator: `seen = set(); [x for x in items if not (x in seen or seen.add(x))]`.
 
 ---
 
@@ -279,19 +279,19 @@ Q: How do you convert between `str` and `bytes`?
 A: `s.encode("utf-8")` → bytes (str → bytes at the I/O edge). `b.decode("utf-8")` → str. Never mix them with `+` or `==` — TypeError.
 
 Q: What happens on `"é".encode("ascii")`?
-A: `UnicodeEncodeError` — é not in ASCII. Use `errors="replace"`, `"ignore"`, or `"backslashreplace"`. For decoding, `b.decode("utf-8", errors="replace")` substitutes U+FFFD (replacement char).
+A: `UnicodeEncodeError` — é not in ASCII. Use `errors="replace"`, `"ignore"`, or `"backslashreplace"`. For decoding, `b.decode("utf-8", errors="replace")` substitutes the � char.
 
 Q: What is a code point and how do `ord()` / `chr()` work?
 A: Code point = integer identifying a Unicode char. `ord("A")` → 65, `chr(65)` → "A". A code point's byte length depends on encoding — "é" is 2 bytes in UTF-8, 2 in UTF-16, 4 in UTF-32.
 
 Q: What's the difference between UTF-8 and UTF-16?
-A: UTF-8: 1–4 bytes, ASCII-compatible, web default. UTF-16: 2–4 bytes, needs BOM to signal byte order, legacy on Windows/Java. UTF-32: fixed 4 bytes, wasteful. [Source: Unicode Standard, Section 3.9]
+A: UTF-8: 1–4 bytes, ASCII-compatible, web default. UTF-16: 2–4 bytes, needs BOM to signal byte order, legacy on Windows/Java. UTF-32: fixed 4 bytes, wasteful.
 
-Q: Why does `"café" == "café"` evaluate to False, and how do you fix it?
-A: Same visual text, different code points (precomposed é vs e + combining accent). Fix with `unicodedata.normalize("NFC", s)` — composes canonically. `NFD` decomposes. [Source: unicode.org/reports/tr15]
+Q: Why does `"café" == "café"` evaluate to False, and how do you fix it?
+A: Same visual text, different code points (precomposed é vs e + combining accent). Fix with `unicodedata.normalize("NFC", s)` — composes canonically. `NFD` decomposes.
 
 Q: When should you use `casefold()` instead of `lower()`?
-A: For case-insensitive comparison. `casefold()` handles German ß: `"Straße".casefold() == "strasse".casefold()` → True, but `lower()` → False. [Source: Unicode Standard, Section 3.13]
+A: For case-insensitive comparison. `casefold()` handles German ß: `"Straße".casefold() == "strasse".casefold()` → True, but `lower()` → False.
 
 Q: How do you strip accents from text?
 A: `unicodedata.normalize("NFD", s)` then filter out `unicodedata.combining(c)` chars: `"".join(c for c in NFD(s) if not combining(c))`.
@@ -368,3 +368,89 @@ A: Functions are objects: assignable (`g = f`), passable as args (`apply(f, x)`)
 
 Q: What's the recursion limit and why does it matter?
 A: Default ~1000 (`sys.getrecursionlimit()`). Exceeding it raises `RecursionError`. Always have a base case; prefer iteration for deep recursion.
+
+## Ch 6: Comprehensions, Lambda & Functional Tools
+
+Q: What's the syntax for a list comprehension?
+A: `[expr for item in iterable if condition]`
+
+Q: How to flatten a 2D list with a list comprehension?
+A: `[x for row in matrix for x in row]` — outer loop first, inner loop second.
+
+Q: What's a dict comprehension?
+A: `{key_expr: value_expr for item in iterable if condition}` — e.g., `{w: len(w) for w in words}`
+
+Q: What's a set comprehension?
+A: `{expr for item in iterable if condition}` — e.g., `{len(w) for w in words}` gives unique lengths.
+
+Q: Difference between list comprehension and generator expression?
+A: List comprehension creates full list in memory. Generator expression (`(...)`) yields lazily — memory efficient for large sequences.
+
+Q: When to use generator expression vs list comprehension?
+A: Generator for large/infinite sequences, chaining, memory-constrained. List for small data, need random access/len/indexing.
+
+Q: How to sum squares using a generator expression?
+A: `sum(x**2 for x in range(10))` — no extra brackets needed as sole argument.
+
+Q: What's the lambda syntax?
+A: `lambda args: expression` — single expression only, no statements.
+
+Q: Lambda with default arguments?
+A: `lambda a, b=2: a * b` — defaults evaluated at definition time.
+
+Q: Common lambda use case?
+A: `key=` functions: `sorted(items, key=lambda x: x[1])` or `map`/`filter` callbacks.
+
+Q: Late-binding gotcha with lambdas in loops?
+A: `funcs = [lambda: i for i in range(3)]` → all return 2. Fix: `lambda i=i: i` binds value as default.
+
+Q: When to prefer `def` over `lambda`?
+A: Named function needed, multiple statements, recursion, docstring/type hints, readability.
+
+Q: What does `map(func, iterable)` do?
+A: Returns iterator applying func to each item: `list(map(str.upper, ["a", "b"]))` → `["A", "B"]`.
+
+Q: What does `filter(func, iterable)` do?
+A: Returns iterator of items where func is truthy: `list(filter(lambda x: x>5, range(10)))` → `[6,7,8,9]`.
+
+Q: What does `functools.reduce(func, iterable)` do?
+A: Cumulatively applies binary function: `reduce(lambda a,b: a+b, [1,2,3])` → 6. With initializer: `reduce(add, [], 0)` → 0.
+
+Q: What's `functools.partial` for?
+A: Fix some arguments of a function: `square = partial(pow, exp=2)` → `square(5)` = 25.
+
+Q: What does `itertools.count` do?
+A: Infinite counter: `zip(count(), ['a','b'])` → `[(0,'a'), (1,'b')]`.
+
+Q: What does `itertools.cycle` do?
+A: Infinite repetition: `islice(cycle([1,2]), 5)` → `[1,2,1,2,1]`.
+
+Q: What does `itertools.islice` do?
+A: Slice an iterator: `islice(range(100), 5, 15)` → `[5..14]` without creating full list.
+
+Q: What does `itertools.chain` do?
+A: Concatenate iterables: `chain([1,2], [3,4])` → `[1,2,3,4]`. `chain.from_iterable(matrix)` flattens.
+
+Q: Difference between `product`, `permutations`, `combinations`?
+A: `product` = Cartesian product (ordered, with replacement). `permutations` = ordered, no replacement. `combinations` = unordered, no replacement.
+
+Q: What does `itertools.groupby` require?
+A: Input must be pre-sorted by the grouping key. Groups consecutive items with same key.
+
+Q: What does `operator.itemgetter` do?
+A: Returns callable extracting item by index/key: `itemgetter(1)(["a","b"])` → `"b"`. Faster than lambda.
+
+Q: What does `operator.attrgetter` do?
+A: Extracts attribute: `attrgetter("age")(person)` → `person.age`. Use with `sorted(key=)`.
+
+Q: What does `operator.methodcaller` do?
+A: Calls method by name: `methodcaller("upper")("hi")` → `"HI"`. `methodcaller("replace"," ","-")("a b")` → `"a-b"`.
+
+Q: How to group by key using dict comprehension?
+A: `{k: [v for k2,v in data if k2==k] for k in set(k for k,_ in data)}` — inefficient for large data.
+
+Q: Better way to group — use `itertools.groupby`?
+A: Sort first, then `{k: [v for _,v in g] for k,g in groupby(sorted_data, key=lambda x: x[0])}`.
+
+Q: What's the `operator` module arithmetic functions?
+A: `add(a,b)`, `mul(a,b)`, `sub(a,b)`, `truediv(a,b)` — use with `reduce`: `reduce(add, [1,2,3])` → 6.

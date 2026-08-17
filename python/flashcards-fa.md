@@ -133,7 +133,7 @@ Q: `namedtuple` چیه؟
 A: `namedtuple("Point", ["x", "y"])` یک زیرکلاس از tuple با فیلدهای نام‌دار می‌سازه. دسترسی با نام (`p.x`) یا ایندکس (`p[0]`). Immutable، hashable، کم‌مصرف.
 
 Q: کی از `array.array` به جای `list` استفاده کنیم؟
-A: برای داده‌های عددی همگن بزرگ — کم‌مصرف، type-safe، I/O باینری سریع. لیست برای داده‌های ناهمگن یا ترکیبی.
+A: برای داده‌های عددی همگن بزرگ — کم‌مصرف، type-safe، I/O باینری سریع. لیست برای داده‌های ناهن یا ترکیبی.
 
 Q: `collections.deque` چه مزیتی نسبت به `list` داره؟
 A: O(1) `append`/`popleft` در هر دو سمت. لیست O(n) `pop(0)` داره. deque ایده‌آل برای صف‌ها، sliding windowها، و بافر محدود (`maxlen`).
@@ -257,7 +257,7 @@ Q: `collections.abc.Mapping` و `MutableMapping` چی هستند؟
 A: ABC برای کلاس‌های dict-like. با پیاده‌سازی ۶ متد core، ۲۰+ متد رایگان می‌گیرید (keys, values, items, get, pop, update, clear).
 
 Q: آیا `dict.keys()` و `dict.items()` از عملیات set پشتیبانی می‌کنن؟
-A: بله — `KeysView` و `ItemsView` پروتکل `Set` را پیاده‌سازی می‌کنن. `d1.keys() & d2.keys()` → کلیدهای مشترک. `d1.items() ^ d2.items()` → آیتم‌های تغییرکرده. `d.values()` پشتیبانی نمی‌کنه. عملیات items نیاز داره همه جفت‌های (کلید، مقدار) hashable باشن — اگه مقداری list یا dict باشه خطا می‌ده.
+A: بله — `KeysView` و `ItemsView` پروتکل `Set` را پیاده‌سازی می‌کنن. `d1.keys() & d2.keys()` → کلیدهای مشترک. `d1.items() ^ d2.items()` → آیتم‌های تغییرکرده. `d.values()` پشتیبانی نمی‌کنه.
 
 Q: چطور کلید با min/max مقدار رو در دیکشنری پیدا کنیم؟
 A: `min(prices, key=prices.get)` — از `dict.get` به عنوان تابع key استفاده می‌کنه. برای مرتب‌سازی: `sorted(prices, key=prices.get)`.
@@ -276,7 +276,7 @@ Q: چطور بین `str` و `bytes` تبدیل انجام بدیم؟
 A: `s.encode("utf-8")` → بایت (در مرز I/O). `b.decode("utf-8")` → رشته. هیچ‌وقت با `+` یا `==` ترکیبشون نکن — `TypeError`.
 
 Q: وقتی `"é".encode("ascii")` چی می‌شه؟
-A: `UnicodeEncodeError` — é در ASCII نیست. از `errors="replace"`، `"ignore"` یا `"backslashreplace"` استفاده کن. برای decode: `b.decode("utf-8", errors="replace")` کاراکتر جایگزین (U+FFFD) قرار می‌کنه.
+A: `UnicodeEncodeError` — é در ASCII نیست. از `errors="replace"`، `"ignore"` یا `"backslashreplace"` استفاده کن. برای decode: `b.decode("utf-8", errors="replace")` کاراکتر � جایگزین می‌کنه.
 
 Q: کد پوینت چیه و `ord()`/`chr()` چطور کار می‌کنن؟
 A: کد پوینت = عدد صحیح شناسایی یک کاراکتر یونیکد. `ord("A")` → ۶۵، `chr(65)` → `"A"`. طول بایت کد پوینت به encoding بستگی داره — "é" در UTF-8 دو بایت، در UTF-16 دو بایت، در UTF-32 چهار بایت.
@@ -284,7 +284,7 @@ A: کد پوینت = عدد صحیح شناسایی یک کاراکتر یونی
 Q: فرق UTF-8 و UTF-16 چیه؟
 A: UTF-8: ۱ تا ۴ بایت، سازگار با ASCII، استاندارد وب. UTF-16: ۲ تا ۴ بایت، نیاز به BOM برای تشخیص byte order، قدیمی. UTF-32: ثابت ۴ بایت، پرهزینه.
 
-Q: چرا `"café" == "café"` برابر False هست و چطور حلش کنیم؟
+Q: چرا `"café" == "café"` برابر False هست و چطور حلش کنیم؟
 A: متن یکسان ولی کد پوینت‌های متفاوت (é آماده vs e + اکسنت ترکیبی). راه‌حل: `unicodedata.normalize("NFC", s)` — به شکل ترکیبی نرمال می‌کنه. `NFD` تجزیه می‌کنه.
 
 Q: کی به جای `lower()` از `casefold()` استفاده کنیم؟
@@ -359,3 +359,89 @@ A: توابع object هستن: قابل انتساب (`g = f`)، قابل ارس
 
 Q: حد بازگشت چقدره و چرا مهمه؟
 A: حدود ۱۰۰۰ (`sys.getrecursionlimit()`). بیشتر از اون `RecursionError` می‌ده. همیشه base case داشته باش؛ برای بازگشت عمیق از iteration استفاده کن.
+
+## فصل ۶: Comprehensions، Lambda و ابزارهای Functional
+
+Q: سینتکس list comprehension چیه؟
+A: `[expr for item in iterable if condition]`
+
+Q: چطور لیست ۲ بعدی رو با list comprehension صاف (flatten) کنیم؟
+A: `[x for row in matrix for x in row]` — حلقه بیرونی اول، درونی دوم.
+
+Q: dict comprehension چیه؟
+A: `{key_expr: value_expr for item in iterable if condition}` — مثل `{w: len(w) for w in words}`
+
+Q: set comprehension چیه؟
+A: `{expr for item in iterable if condition}` — مثل `{len(w) for w in words}` طول‌های منحصر‌به‌فرد.
+
+Q: تفاوت list comprehension و generator expression؟
+A: List comprehension کل لیست در حافظه می‌سازه. Generator expression (`(...)`) به صورت lazy تولید می‌کنه — بهینه برای حافظه.
+
+Q: کی از generator expression و کی از list comprehension استفاده می‌کنیم؟
+A: Generator برای دنباله‌های بزرگ/بی‌نهایت، زنجیر کردن، محدودیت حافظه. List برای داده‌های کوچک، نیاز به دسترسی تصادفی/len/index.
+
+Q: چطور مجموع مربعات رو با generator expression بگیریم؟
+A: `sum(x**2 for x in range(10))` — نیازی به براکت اضافی نیست وقتی تنها آرگومان هست.
+
+Q: سینتکس lambda چیه؟
+A: `lambda args: expression` — فقط یک expression، statement نمی‌گیره.
+
+Q: lambda با آرگومان پیش‌فرض؟
+A: `lambda a, b=2: a * b` — پیش‌فرض‌ها در زمان تعریف ارزیابی می‌شن.
+
+Q: مورد استفاده رایج lambda؟
+A: توابع `key=`: `sorted(items, key=lambda x: x[1])` یا callbackهای `map`/`filter`.
+
+Q: مشکل late-binding در lambdaهای داخل حلقه؟
+A: `funcs = [lambda: i for i in range(3)]` → همه ۲ برمی‌گردونن. راه‌حل: `lambda i=i: i` مقدار رو به عنوان پیش‌فرض bind می‌کنه.
+
+Q: کی `def` رو به `lambda` ترجیح میدیم؟
+A: تابع نام‌گذاری شده لازم باشه، چند statement، recursion، docstring/type hint، خواناتر باشه.
+
+Q: `map(func, iterable)` چیکار می‌کنه؟
+A: iterator برمی‌گردونه که func رو روی هر item اعمال می‌کنه: `list(map(str.upper, ["a", "b"]))` → `["A", "B"]`.
+
+Q: `filter(func, iterable)` چیکار می‌کنه؟
+A: iterator از itemهایی که func Truthy برمی‌گردونه: `list(filter(lambda x: x>5, range(10)))` → `[6,7,8,9]`.
+
+Q: `functools.reduce(func, iterable)` چیکار می‌کنه؟
+A: تابع دودویی رو به صورت تجمعی اعمال می‌کنه: `reduce(lambda a,b: a+b, [1,2,3])` → 6. با initializer: `reduce(add, [], 0)` → 0.
+
+Q: `functools.partial` برای چیه؟
+A: فیکس کردن برخی آرگومان‌ها: `square = partial(pow, exp=2)` → `square(5)` = 25.
+
+Q: `itertools.count` چیکار می‌کنه؟
+A: شمارنده بی‌نهایت: `zip(count(), ['a','b'])` → `[(0,'a'), (1,'b')]`.
+
+Q: `itertools.cycle` چیکار می‌کنه؟
+A: تکرار بی‌نهایت: `islice(cycle([1,2]), 5)` → `[1,2,1,2,1]`.
+
+Q: `itertools.islice` چیکار می‌کنه؟
+A: برش دادن iterator: `islice(range(100), 5, 15)` → `[5..14]` بدون ساختن لیست کامل.
+
+Q: `itertools.chain` چیکار می‌کنه؟
+A: الحاق iterables: `chain([1,2], [3,4])` → `[1,2,3,4]`. `chain.from_iterable(matrix)` صاف می‌کنه.
+
+Q: تفاوت `product`، `permutations`، `combinations`؟
+A: `product` = Cartesian product (مرتب، با replacement). `permutations` = مرتب، بدون replacement. `combinations` = نامرتب، بدون replacement.
+
+Q: `itertools.groupby` چه پیش‌نیازی داره؟
+A: ورودی باید بر اساس کلید grouping سورت شده باشه. itemهای متوالی با کلید یکسان رو گروه‌بندی می‌کنه.
+
+Q: `operator.itemgetter` چیکار می‌کنه؟
+A: callable برمی‌گردونه که item رو با index/key استخراج می‌کنه: `itemgetter(1)(["a","b"])` → `"b"`. سریعتر از lambda.
+
+Q: `operator.attrgetter` چیکار می‌کنه؟
+A: attribute استخراج می‌کنه: `attrgetter("age")(person)` → `person.age`. با `sorted(key=)` استفاده می‌شه.
+
+Q: `operator.methodcaller` چیکار می‌کنه؟
+A: متد رو با نام صدا میزنه: `methodcaller("upper")("hi")` → `"HI"`. `methodcaller("replace"," ","-")("a b")` → `"a-b"`.
+
+Q: چطور با dict comprehension بر اساس کلید گروه‌بندی کنیم؟
+A: `{k: [v for k2,v in data if k2==k] for k in set(k for k,_ in data)}` — برای داده‌های بزرگ ناکارآمد.
+
+Q: روش بهتر گروه‌بندی — `itertools.groupby`؟
+A: اول سورت کن، بعد `{k: [v for _,v in g] for k,g in groupby(sorted_data, key=lambda x: x[0])}`.
+
+Q: توابع محاسبه‌ای `operator` کدوم‌ان؟
+A: `add(a,b)`, `mul(a,b)`, `sub(a,b)`, `truediv(a,b)` — با `reduce`: `reduce(add, [1,2,3])` → 6.
