@@ -1,6 +1,5 @@
 # نوت ۱: ظرفیت شبکه‌ی عصبی و نقش مقیاس در موفقیت Deep Learning
 
-**دوره:** Neural Networks and Deep Learning (Coursera / DeepLearning.AI)
 **پیش‌نیاز:** آشنایی مقدماتی با machine learning (regression، classification، مفهوم training/test set)
 
 اگر کمی با machine learning آشنا باشید، احتمالاً این سؤال برایتان پیش آمده: شبکه‌های عصبی که پایه‌ی Deep Learning هستند، از دهه‌ی ۱۹۸۰ وجود داشتند. پس چرا فقط در ده-پانزده سال گذشته این‌قدر قدرتمند شدند؟
