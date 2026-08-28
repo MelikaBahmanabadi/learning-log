@@ -133,7 +133,7 @@ Q: `namedtuple` چیه؟
 A: `namedtuple("Point", ["x", "y"])` یک زیرکلاس از tuple با فیلدهای نام‌دار می‌سازه. دسترسی با نام (`p.x`) یا ایندکس (`p[0]`). Immutable، hashable، کم‌مصرف.
 
 Q: کی از `array.array` به جای `list` استفاده کنیم؟
-A: برای داده‌های عددی همگن بزرگ — کم‌مصرف، type-safe، I/O باینری سریع. لیست برای داده‌های ناهن یا ترکیبی.
+A: برای داده‌های عددی همگن بزرگ — کم‌مصرف، type-safe، I/O باینری سریع. لیست برای داده‌های ناهمگن یا ترکیبی.
 
 Q: `collections.deque` چه مزیتی نسبت به `list` داره؟
 A: O(1) `append`/`popleft` در هر دو سمت. لیست O(n) `pop(0)` داره. deque ایده‌آل برای صف‌ها، sliding windowها، و بافر محدود (`maxlen`).
@@ -257,7 +257,7 @@ Q: `collections.abc.Mapping` و `MutableMapping` چی هستند؟
 A: ABC برای کلاس‌های dict-like. با پیاده‌سازی ۶ متد core، ۲۰+ متد رایگان می‌گیرید (keys, values, items, get, pop, update, clear).
 
 Q: آیا `dict.keys()` و `dict.items()` از عملیات set پشتیبانی می‌کنن؟
-A: بله — `KeysView` و `ItemsView` پروتکل `Set` را پیاده‌سازی می‌کنن. `d1.keys() & d2.keys()` → کلیدهای مشترک. `d1.items() ^ d2.items()` → آیتم‌های تغییرکرده. `d.values()` پشتیبانی نمی‌کنه.
+A: بله — `KeysView` و `ItemsView` پروتکل `Set` را پیاده‌سازی می‌کنن. `d1.keys() & d2.keys()` → کلیدهای مشترک. `d1.items() ^ d2.items()` → آیتم‌های تغییرکرده. `d.values()` پشتیبانی نمی‌کنه. عملیات items نیاز داره همه جفت‌های (کلید، مقدار) hashable باشن — اگه مقداری list یا dict باشه خطا می‌ده.
 
 Q: چطور کلید با min/max مقدار رو در دیکشنری پیدا کنیم؟
 A: `min(prices, key=prices.get)` — از `dict.get` به عنوان تابع key استفاده می‌کنه. برای مرتب‌سازی: `sorted(prices, key=prices.get)`.
@@ -276,7 +276,7 @@ Q: چطور بین `str` و `bytes` تبدیل انجام بدیم؟
 A: `s.encode("utf-8")` → بایت (در مرز I/O). `b.decode("utf-8")` → رشته. هیچ‌وقت با `+` یا `==` ترکیبشون نکن — `TypeError`.
 
 Q: وقتی `"é".encode("ascii")` چی می‌شه؟
-A: `UnicodeEncodeError` — é در ASCII نیست. از `errors="replace"`، `"ignore"` یا `"backslashreplace"` استفاده کن. برای decode: `b.decode("utf-8", errors="replace")` کاراکتر � جایگزین می‌کنه.
+A: `UnicodeEncodeError` — é در ASCII نیست. از `errors="replace"`، `"ignore"` یا `"backslashreplace"` استفاده کن. برای decode: `b.decode("utf-8", errors="replace")` کاراکتر جایگزین (U+FFFD) قرار می‌کنه.
 
 Q: کد پوینت چیه و `ord()`/`chr()` چطور کار می‌کنن؟
 A: کد پوینت = عدد صحیح شناسایی یک کاراکتر یونیکد. `ord("A")` → ۶۵، `chr(65)` → `"A"`. طول بایت کد پوینت به encoding بستگی داره — "é" در UTF-8 دو بایت، در UTF-16 دو بایت، در UTF-32 چهار بایت.
@@ -284,7 +284,7 @@ A: کد پوینت = عدد صحیح شناسایی یک کاراکتر یونی
 Q: فرق UTF-8 و UTF-16 چیه؟
 A: UTF-8: ۱ تا ۴ بایت، سازگار با ASCII، استاندارد وب. UTF-16: ۲ تا ۴ بایت، نیاز به BOM برای تشخیص byte order، قدیمی. UTF-32: ثابت ۴ بایت، پرهزینه.
 
-Q: چرا `"café" == "café"` برابر False هست و چطور حلش کنیم؟
+Q: چرا `"café" == "café"` برابر False هست و چطور حلش کنیم؟
 A: متن یکسان ولی کد پوینت‌های متفاوت (é آماده vs e + اکسنت ترکیبی). راه‌حل: `unicodedata.normalize("NFC", s)` — به شکل ترکیبی نرمال می‌کنه. `NFD` تجزیه می‌کنه.
 
 Q: کی به جای `lower()` از `casefold()` استفاده کنیم؟
@@ -429,7 +429,7 @@ Q: `itertools.groupby` چه پیش‌نیازی داره؟
 A: ورودی باید بر اساس کلید grouping سورت شده باشه. itemهای متوالی با کلید یکسان رو گروه‌بندی می‌کنه.
 
 Q: `operator.itemgetter` چیکار می‌کنه؟
-A: callable برمی‌گردونه که item رو با index/key استخراج می‌کنه: `itemgetter(1)(["a","b"])` → `"b"`. سریعتر از lambda.
+A: callable برمی‌گردونه که item رو با index/key استخراج می‌کنه: `itemgetter(1)(["a","b"])` → `"b"`. برای استخراج ساده معمولاً از lambda واضح‌تره.
 
 Q: `operator.attrgetter` چیکار می‌کنه؟
 A: attribute استخراج می‌کنه: `attrgetter("age")(person)` → `person.age`. با `sorted(key=)` استفاده می‌شه.

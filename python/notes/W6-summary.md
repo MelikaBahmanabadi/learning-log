@@ -117,10 +117,10 @@ Generator expressions look like list comprehensions but use parentheses and prod
 
 ```python
 # List comprehension — creates full list in memory
-squares_list = [x**2 for x in range(1_000_000)]  # ~8 MB
+squares_list = [x**2 for x in range(1_000_000)]  # holds all 1,000,000 values in memory
 
 # Generator expression — yields one at a time
-squares_gen = (x**2 for x in range(1_000_000))   # ~200 bytes
+squares_gen = (x**2 for x in range(1_000_000))   # holds nothing up front — yields lazily
 
 next(squares_gen)  # 0
 next(squares_gen)  # 1
@@ -141,9 +141,9 @@ next(squares_gen)  # 1
 sum(x**2 for x in range(10))      # generator expression
 sum([x**2 for x in range(10)])    # list comprehension (wastes memory)
 
-# But you need parens in other contexts
-list(x**2 for x in range(5))      # generator
-# (x**2 for x in range(5))        # syntax error — ambiguous
+# In other contexts, wrap the generator expression in parens
+list(x**2 for x in range(5))      # generator expression
+(x**2 for x in range(5))          # a generator object — not a tuple
 ```
 
 ---
@@ -362,7 +362,7 @@ for key, group in groupby(data_sorted, key=lambda x: x[0]):
 
 ## 6.7 `operator` Module — Functional Alternatives to Lambdas
 
-Functions for common operations — faster and more readable than lambdas.
+Functions for common operations — often clearer and more concise than lambdas.
 
 ```python
 from operator import itemgetter, attrgetter, methodcaller, add, mul
@@ -464,7 +464,7 @@ A: Cumulatively applies a binary function to items of an iterable, reducing to a
 A: `product` = Cartesian product (ordered, with replacement). `permutations` = ordered, no replacement. `combinations` = unordered, no replacement.
 
 **Q: How does `operator.itemgetter` work?**
-A: Returns a callable that extracts an item by index/key: `itemgetter(1)(["a", "b"])` → `"b"`. Faster than `lambda x: x[1]` and works with `sorted(key=)`.
+A: Returns a callable that extracts an item by index/key: `itemgetter(1)(["a", "b"])` → `"b"`. Often clearer than `lambda x: x[1]` for simple extraction and works with `sorted(key=)`.
 
 **Q: What does `itertools.groupby` require?**
 A: Input must be pre-sorted by the grouping key. Groups consecutive items with the same key.
@@ -483,7 +483,7 @@ A: Pre-filling arguments to create specialized functions. E.g., `partial(open, e
 5. **Lambda** — single expression, anonymous. Best for `key=`/`func=` arguments. Avoid in loops (late binding).
 6. **`map`/`filter`/`reduce`** — functional tools. Often comprehensions are more readable.
 7. **`itertools`** — infinite iterators (`count`, `cycle`, `repeat`), slicing (`islice`), combinatorial (`product`, `permutations`, `combinations`), grouping (`groupby`).
-8. **`operator` module** — `itemgetter`, `attrgetter`, `methodcaller`, `add`, `mul` — faster and more readable than equivalent lambdas.
+8. **`operator` module** — `itemgetter`, `attrgetter`, `methodcaller`, `add`, `mul` — often clearer and more concise than equivalent lambdas.
 9. **`functools.partial`** — fix arguments to create specialized functions.
 
 ---
