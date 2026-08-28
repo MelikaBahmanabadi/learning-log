@@ -32,7 +32,7 @@ Chapter notes for AI Engineer learning journey — Python basics to advanced, OO
 | 4 | [Strings, Bytes & Text Processing](W4-summary.md) | F7–9, E3 | Basic Python: String Manipulation | 🟢 Done |
 | 5 | [Functions, Scope & Closures](W5-summary.md) | F6, E5–8, PC7 | Basic Python: Functions | 🟢 Done |
 | 6 | [Comprehensions, Lambda & Functional Tools](W6-summary.md) | F2, E5–8, PC1 | Basic Python: Comprehensions, Lambda | 🟢 Done |
-| 7 | Modules, Packages & Import System | PC7 | Basic Python: Modules & Packages | 🔜 |
+| 7 | [Modules, Packages & Import System](W7-summary.md) | PC7 | Basic Python: Modules & Packages | 🟢 Done |
 | 8 | File Handling & I/O | CC8–9 | Basic Python: File Handling, I/O | 🔜 |
 
 ### Part II: Advanced Python (10 chapters)
@@ -118,7 +118,7 @@ Chapter notes for AI Engineer learning journey — Python basics to advanced, OO
 
 | Roadmap Section | Chapters | Status |
 | --------------- | -------- | ------ |
-| 1. Basic Python | Ch 1–8 | 🟢 Ch 1–6 done, others 🔜 |
+| 1. Basic Python | Ch 1–8 | 🟢 Ch 1–7 done, Ch 8 🔜 |
 | 2. Advanced Python | Ch 9–18 | 🔜 |
 | 3. OOP | Ch 19–23 | 🔜 |
 | 4. DSA | Ch 24–27 | 🔜 |

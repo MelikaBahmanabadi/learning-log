@@ -11,7 +11,7 @@
 | 4 | Strings, Bytes & Text Processing | 🟢 Done | F7–9, E3 | String Manipulation |
 | 5 | Functions, Scope & Closures | 🟢 Done | F6, E5–8, PC7 | Functions |
 | 6 | Comprehensions, Lambda & Functional Tools | 🟢 Done | F2, E5–8, PC1 | Comprehensions |
-| 7 | Modules, Packages & Import System | 🔜 | PC7 | Modules & Packages |
+| 7 | Modules, Packages & Import System | 🟢 Done | PC7 | Modules & Packages |
 | 8 | File Handling & I/O | 🔜 | CC8–9 | File Handling, I/O |
 
 ### Part II: Advanced Python (Ch 9–18)

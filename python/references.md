@@ -102,6 +102,72 @@ This file documents verifiable sources for version-sensitive, implementation-spe
 - **Feature**: Structural pattern matching (`match/case`)
 - **Source**: [PEP 634](https://peps.python.org/pep-0634/)
 
+## Modules, Packages & Import System
+
+### Module vs Package
+- **Claim**: Module = single `.py` file; package = directory with `__init__.py` (or namespace package)
+- **Source**: [Python Tutorial: Modules](https://docs.python.org/3/tutorial/modules.html)
+
+### Regular Packages & `__init__.py`
+- **Claim**: `__init__.py` runs on first import of the package or any submodule
+- **Source**: [Python Reference: The import system — Regular packages](https://docs.python.org/3/reference/import.html#regular-packages)
+
+### `__all__`
+- **Claim**: Controls `from package import *`
+- **Source**: [Python Tutorial: Importing * From a Package](https://docs.python.org/3/tutorial/modules.html#importing-from-a-package)
+
+### Absolute vs Relative Imports
+- **Claim**: Absolute imports preferred (PEP 8); relative imports use `.` / `..`
+- **Source**: [PEP 8 — Imports](https://peps.python.org/pep-0008/#imports), [PEP 328](https://peps.python.org/pep-0328/)
+
+### Namespace Packages
+- **Claim**: Packages without `__init__.py` merge multiple directories
+- **Source**: [PEP 420](https://peps.python.org/pep-0420/)
+
+### `importlib`
+- **Claim**: `import_module()`, `reload()`, `util.spec_from_file_location()`
+- **Source**: [Docs: importlib](https://docs.python.org/3/library/importlib.html)
+
+### `importlib.resources.files()`
+- **Claim**: `files()` / `read_text()` / `read_bytes()` API is Python 3.9+
+- **Source**: [Docs: importlib.resources](https://docs.python.org/3/library/importlib.resources.html)
+
+### `pkgutil`
+- **Claim**: `get_data()`, `iter_modules()`
+- **Source**: [Docs: pkgutil](https://docs.python.org/3/library/pkgutil.html)
+
+### `runpy`
+- **Claim**: `run_module()` / `run_path()` run code as `__main__`
+- **Source**: [Docs: runpy](https://docs.python.org/3/library/runpy.html)
+
+### `sys.path`
+- **Claim**: Module search order — script dir → PYTHONPATH → stdlib → site-packages
+- **Source**: [Docs: sys.path](https://docs.python.org/3/library/sys.html#sys.path)
+
+### `__name__ == "__main__"`
+- **Claim**: Guard for direct execution
+- **Source**: [Docs: `__main__`](https://docs.python.org/3/library/__main__.html)
+
+### Circular Imports
+- **Claim**: Fix by lazy imports, restructuring, or importlib
+- **Source**: [Python FAQ: Programming](https://docs.python.org/3/faq/programming.html)
+
+### `src/` Layout & Packaging
+- **Claim**: `src/mypackage/` layout avoids accidental imports from working dir
+- **Source**: [Python Packaging User Guide](https://packaging.python.org/en/latest/tutorials/packaging-projects/)
+
+### `pyproject.toml`
+- **Claim**: Modern packaging config (PEP 517/518/621)
+- **Source**: [PEP 621](https://peps.python.org/pep-0621/), [PEP 517](https://peps.python.org/pep-0517/)
+
+### Editable Installs
+- **Claim**: `pip install -e .` installs via symlinks
+- **Source**: [PEP 660](https://peps.python.org/pep-0660/)
+
+### Leading Underscore & Conditional Imports
+- **Claim**: `_name` convention; `try/except ImportError` for optional deps
+- **Source**: [PEP 8](https://peps.python.org/pep-0008/)
+
 ## References for Flashcard Citations
 
 When a flashcard makes a version-sensitive or implementation-specific claim, cite:
