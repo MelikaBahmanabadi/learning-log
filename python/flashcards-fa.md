@@ -452,16 +452,16 @@ Q: تفاوت module و package چیست؟
 A: Module = فایل .py تکی. Package = دایرکتوری با __init__.py (یا namespace package در PEP 420) که ماژول/زیرپکیج داره.
 
 Q: __init__.py کی اجرا می‌شه؟
-A: وقتی package یا هر submodule اون **اولین بار** import می‌شه. یک بار در هر session interpreter.
+A: وقتی package **اولین بار** import بشه. تا وقتی package در sys.modules کش شده، import زیرماژول‌های بعدی دیگه اجراش نمی‌کنن.
 
 Q: __all__ در __init__.py چیکار می‌کنه؟
-A: API عمومی برای `from package import *` تعریف می‌کنه. نام‌های export شده رو لیست می‌کنه. مستندسازی interface هم هست.
+A: در درجه اول رفتار `from package import *` (star-import) رو کنترل می‌کنه — مشخص می‌کنه کدوم نام‌ها export بشن. ولی public API رو «اعمال» نمی‌کنه و جلوی import مستقیم بقیه نام‌ها رو نمی‌گیره.
 
 Q: Absolute vs relative imports — کدوم ترجیح داده می‌شه؟
-A: Absolute imports (PEP 8) — غیرابهام، همه‌جا کار می‌کنن. Relative imports فقط داخل package کار می‌کنن.
+A: Absolute imports (PEP 8) — غیرابهام، همه‌جا کار می‌کنن. Relative imports به package context (`__package__`) نیاز دارن، نه صرفاً بودن داخل package — اجرا به صورت فایل (`python path/to/module.py`) این context رو نداره؛ به جاش از `python -m package.module` استفاده کن.
 
 Q: سینتکس relative import؟
-A: `from . import module` (همین package)، `from .. import module` (package والد)، `from ..sub import func`.
+A: `from . import module` (همین package)، `from .. import module` (package والد)، `from ..sub import func`. با `python -m package.module` اجرا کن تا relative importها resolve بشن.
 
 Q: Namespace package (PEP 420) چیه؟
 A: Package **بدون** __init__.py — چند دایرکتوری در یک namespace ادغام میشن. برای pluginها، توزیع‌های جدا.
@@ -470,7 +470,7 @@ Q: چطور ماژول رو به صورت داینامیک با نام رشته�
 A: `importlib.import_module("json")` یا `importlib.import_module(".module_a", package="mypackage")` برای relative.
 
 Q: چطور ماژول رو بعد از ویرایش reload کنیم؟
-A: `importlib.reload(module)` — کد ماژول دوباره اجرا می‌شه، sys.modules آپدیت می‌شه.
+A: `importlib.reload(module)` — کد ماژول رو در namespace موجودش دوباره اجرا می‌کنه. نام‌هایی که قبلاً با `from module import name` import شدن یا رفرنس‌های instanceهای موجود رو آپدیت نمی‌کنه.
 
 Q: چطور ماژول رو از مسیر فایل لود کنیم؟
 A: `spec = importlib.util.spec_from_file_location("name", "/path/to/file.py"); module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)`
@@ -485,7 +485,7 @@ Q: runpy.run_module() چیکار می‌کنه؟
 A: ماژول رو به عنوان __main__ اجرا می‌کنه (مثل `python -m module`). `runpy.run_module("mymodule", run_name="__main__")`.
 
 Q: پایتون چطور ماژول‌ها رو پیدا می‌کنه؟
-A: در sys.path جستجو می‌کنه: ۱) دایرکتوری اسکریپت، ۲) PYTHONPATH، ۳) کتابخانه استاندارد، ۴) site-packages.
+A: در `sys.path` جستجو می‌کنه که محتواش بسته به حالت اجرا، کانفیگ interpreter، site initialization، فایل‌های .pth و isolated mode فرق داره. عوامل رایج: دایرکتوری اسکریپت/`-m`، PYTHONPATH، کتابخانه استاندارد، site-packages. `sys.path` رو در interpreter فعال چک کن.
 
 Q: چطور در runtime دایرکتوری به مسیر جستجو اضافه کنیم؟
 A: `sys.path.insert(0, "/custom/path")` — اما ترجیحا virtual env + `pip install -e .` استفاده کن.
@@ -494,7 +494,7 @@ Q: الگو `if __name__ == "__main__"` چیه؟
 A: کد زیرش فقط وقتی فایل مستقیم اجرا بشه (`python file.py`) ران می‌شه، نه وقتی import بشه.
 
 Q: Circular import چرا پیش میاد و چطور FIX می‌شه؟
-A: ماژول A ایمپورت B می‌کنه، B هم A رو. FIX: import داخل تابع (lazy)، restructure، یا importlib.
+A: ماژول A ایمپورت B می‌کنه، B هم A رو. راه‌حل اصلی: بازطراحی گراف وابستگی. ایمپورت تنبل (داخل تابع) گزینه تاکتیکیه؛ ایمپورت فقط-تایپ می‌تونه از `typing.TYPE_CHECKING` استفاده کنه. `importlib` راه‌حل عمومی نیست.
 
 Q: src/ layout برای package چیه؟
 A: کد در `src/mypackage/` — از import تصادفی از working dir جلوگیری می‌کنه، با ساختار نصب‌شده هم‌خوانی داره.
@@ -503,7 +503,7 @@ Q: pyproject.toml برای چیه؟
 A: کانفیگ بسته‌بندی مدرن (PEP 517/518/621). build-system، metadata پروژه، dependencies، optional deps تعریف می‌کنه.
 
 Q: چطور package رو در حالت editable نصب کنیم؟
-A: `pip install -e .` — با symlink نصب می‌شه، تغییرات بلافاصله بدون reinstall اعمال میشن.
+A: `pip install -e .` — نصب editable تغییرات سورس رو بدون reinstall عادی در دسترس قرار می‌ده. مکانیزم (symlink یا .pth) به installer و build backend بستگی داره.
 
 Q: Conditional import چیه؟
 A: `try: import ujson as json except ImportError: import json` — dependency اختیاری با fallback.

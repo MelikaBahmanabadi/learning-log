@@ -99,9 +99,9 @@ def check_anki_format(filepath: Path) -> list[Issue]:
         if tabs >= 2:
             # This looks like a complete card (has at least 2 tabs for 3 columns)
             cols = line.split("\t")
-            if len(cols) < 3:
+            if len(cols) != 3:
                 issues.append(Issue(str(filepath), i + 1, "anki-format",
-                                  f"Expected 3 columns, got {len(cols)}: {line[:60]!r}"))
+                                  f"Expected exactly 3 tab-separated columns, got {len(cols)}: {line[:60]!r}"))
             # Check for empty front/back
             if cols and not cols[0].strip():
                 issues.append(Issue(str(filepath), i + 1, "anki-content", "Empty Front column"))
@@ -223,6 +223,21 @@ def check_card_parity() -> list[Issue]:
     return issues
 
 
+def check_cross_language() -> list[Issue]:
+    """Verify EN and FA Anki exports have matching card counts (1:1 concept set)."""
+    issues = []
+    en_path = PYTHON_DIR / "flashcards_anki.txt"
+    fa_path = PYTHON_DIR / "flashcards-fa_anki.txt"
+    if en_path.exists() and fa_path.exists():
+        en_cards = extract_anki_cards(en_path.read_text(encoding="utf-8"))
+        fa_cards = extract_anki_cards(fa_path.read_text(encoding="utf-8"))
+        if len(en_cards) != len(fa_cards):
+            issues.append(Issue(
+                "flashcards_anki.txt / flashcards-fa_anki.txt", None, "cross-language",
+                f"EN/FA Anki card count mismatch: EN={len(en_cards)}, FA={len(fa_cards)}"))
+    return issues
+
+
 def check_markdown(filepath: Path) -> list[Issue]:
     """Check markdown links and headings."""
     issues = []
@@ -275,6 +290,9 @@ def main() -> int:
 
     # 3. Card parity
     all_issues.extend(check_card_parity())
+
+    # 3b. Cross-language card count parity (EN vs FA Anki exports)
+    all_issues.extend(check_cross_language())
 
     # 4. Markdown links and headings
     for f in MD_FILES:

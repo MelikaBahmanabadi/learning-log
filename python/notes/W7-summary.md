@@ -88,12 +88,12 @@ myproject/
 
 ### `__init__.py` — Package Initialization
 
-Runs when package or any submodule is first imported. Controls what's exported.
+Runs when the package is initially imported. It is NOT re-executed when later submodules are imported while the package stays cached in `sys.modules`.
 
 ```python
 # mypackage/__init__.py
 
-# Explicit exports — defines public API
+# Explicit re-exports — controls star-import
 from .module_a import func_a
 from .subpackage.module_b import func_b
 
@@ -137,7 +137,7 @@ import mypackage.module_a                 # Also absolute
 
 ### Relative Imports
 
-Use `.` for current package, `..` for parent package. Only work **inside packages**.
+Use `.` for current package, `..` for parent package. Require **package context** (`__package__`), not merely being inside a package.
 
 ```python
 # In mypackage/subpackage/module_b.py
@@ -147,8 +147,8 @@ from .. import something         # Parent package
 ```
 
 **Rules:**
-- Relative imports only work when module is **part of a package** (has `__package__`)
-- Cannot use relative imports in scripts run directly (`__main__`)
+- Relative imports require package context (`__package__`), not merely being inside a package
+- A module run as a file (`python path/to/module.py`) lacks this context — use `python -m package.module`
 - Absolute imports are generally preferred for clarity
 
 ---
@@ -197,7 +197,7 @@ mod = importlib.import_module(".module_a", package="mypackage")
 
 ### `importlib.reload(module)`
 
-Reload a previously imported module — useful for development.
+Re-executes the module in its existing namespace. Does NOT refresh names already imported via `from module import name` or references held by existing instances.
 
 ```python
 import mymodule
@@ -284,8 +284,8 @@ runpy.run_path("/path/to/script.py", run_name="__main__")
 
 ## 7.8 `sys.path` & Module Search
 
-Python searches for modules in `sys.path`:
-1. Directory of the script being run (or `''` for current dir)
+Python searches for modules in `sys.path`, whose exact contents vary by invocation mode, interpreter configuration, site initialization, `.pth` files, and isolated mode. Common contributors include:
+1. Directory of the script being run (or `''` for current dir), or the target of `python -m`
 2. `PYTHONPATH` environment variable
 3. Standard library paths
 4. `site-packages` (installed packages)
@@ -348,8 +348,8 @@ where = ["src"]          # or use find: directive
 ```
 
 ```bash
-# Install in editable mode
-pip install -e .
+# Install in editable mode — exposes source edits without a normal reinstall
+pip install -e .   # mechanism (symlink vs .pth) depends on installer + build backend
 
 # Build distribution
 pip build
@@ -372,9 +372,9 @@ def func_b(): ...
 ```
 
 **Fixes:**
-- Move imports inside functions (lazy import)
-- Restructure to avoid circular dependency
-- Use `importlib` for dynamic loading
+- Redesign the dependency graph (primary fix)
+- Lazy imports inside functions (tactical option)
+- Type-only imports via `typing.TYPE_CHECKING`
 
 ### Shadowing Standard Library
 
@@ -414,16 +414,16 @@ except ImportError:
 A: A module is a single `.py` file. A package is a directory with `__init__.py` (or namespace package) containing modules/subpackages.
 
 **Q: When does `__init__.py` run?**
-A: When the package or any submodule is **first imported**. Runs once per interpreter session.
+A: When the package is initially imported. Later submodule imports do NOT re-execute it while cached in `sys.modules`.
 
 **Q: What does `__all__` do?**
-A: Defines the public API for `from package import *`. Also documents intended exports.
+A: Primarily controls `from package import *` (star-import). Does not enforce a public API or prevent direct imports.
 
 **Q: Absolute vs relative imports — which to prefer?**
-A: Absolute imports (PEP 8). Clearer, work everywhere. Relative imports only inside packages.
+A: Absolute imports (PEP 8). Clearer, work everywhere. Relative imports require package context (`__package__`); use `python -m package.module`.
 
 **Q: How do you fix a circular import?**
-A: Move import inside function (lazy), restructure code, or use `importlib.import_module()`.
+A: Redesign the dependency graph (primary). Lazy imports are tactical; type-only imports can use `typing.TYPE_CHECKING`. `importlib` is not a general fix.
 
 **Q: What's a namespace package (PEP 420)?**
 A: Package without `__init__.py` — multiple directories merge into one namespace. Used for plugins, split distributions.
@@ -432,10 +432,10 @@ A: Package without `__init__.py` — multiple directories merge into one namespa
 A: `importlib.resources.files("pkg.data").joinpath("file.json").read_text()` (Python 3.9+).
 
 **Q: What does `importlib.reload()` do?**
-A: Re-executes module code, updating the module object in `sys.modules`. Useful for dev/REPL.
+A: Re-executes the module in its existing namespace. Does not refresh `from module import name` bindings or existing instances.
 
 **Q: How does Python find modules?**
-A: Searches `sys.path`: script dir → `PYTHONPATH` → stdlib → `site-packages`.
+A: Searches `sys.path`, which varies by invocation mode, config, site init, `.pth` files, and isolated mode. Common contributors: script/`-m` dir, `PYTHONPATH`, stdlib, `site-packages`.
 
 **Q: What's the `src/` layout?**
 A: Package code in `src/mypackage/` — avoids accidental imports from working dir, matches installed structure.
@@ -445,14 +445,14 @@ A: Package code in `src/mypackage/` — avoids accidental imports from working d
 ## Key Takeaways
 
 1. **Module** = `.py` file. **Package** = directory with `__init__.py` (or PEP 420 namespace package).
-2. **`__init__.py`** runs on first import — use for exports (`__all__`), package init, lazy imports.
-3. **Absolute imports** preferred — unambiguous, work everywhere. Relative imports only inside packages.
+2. **`__init__.py`** runs once when the package is first imported — use for re-exports (`__all__`), package init, lazy imports.
+3. **Absolute imports** preferred — unambiguous, work everywhere. Relative imports need package context; run with `python -m package.module`.
 4. **`importlib`** — dynamic imports (`import_module`), reloading (`reload`), loading from path.
 5. **`importlib.resources`** — read package data files (text/binary) without filesystem assumptions.
 6. **`runpy`** — execute modules/files as `__main__` programmatically.
 7. **`sys.path`** controls module search — prefer virtual envs + `pip install -e .` over manual manipulation.
 8. **`pyproject.toml`** — modern packaging standard. Use `[project]`, `[build-system]`, optional deps.
-9. **Circular imports** — fix with lazy imports (inside functions) or restructuring.
+9. **Circular imports** — fix primarily by redesigning the dependency graph; lazy imports are a tactical option.
 10. **`__name__ == "__main__"`** — guard for script-only code (tests, demos).
 
 ---
@@ -460,6 +460,16 @@ A: Package code in `src/mypackage/` — avoids accidental imports from working d
 ## Flashcards
 
 See: [flashcards.md](../flashcards.md), [flashcards-fa.md](../flashcards-fa.md)
+
+## Validation
+
+Verify the Anki exports are well-formed before committing:
+
+```bash
+python3 python/validate.py
+```
+
+This checks, for every `*_anki.txt` file: exactly three tab-separated columns per data row (so no unescaped embedded tabs/newlines), non-empty Front/Back columns, the required header block, plus MD↔Anki card parity and a cross-language (EN↔FA) card-count match.
 
 ## Progress
 

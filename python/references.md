@@ -126,7 +126,7 @@ This file documents verifiable sources for version-sensitive, implementation-spe
 
 ### `importlib`
 - **Claim**: `import_module()`, `reload()`, `util.spec_from_file_location()`
-- **Source**: [Docs: importlib](https://docs.python.org/3/library/importlib.html)
+- **Source**: [Docs: importlib](https://docs.python.org/3/library/importlib.html), [PEP 451 — ModuleSpec](https://peps.python.org/pep-0451/)
 
 ### `importlib.resources.files()`
 - **Claim**: `files()` / `read_text()` / `read_bytes()` API is Python 3.9+

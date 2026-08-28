@@ -461,16 +461,16 @@ Q: What's the difference between a module and a package?
 A: Module = single .py file. Package = directory with __init__.py (or PEP 420 namespace package) containing modules/subpackages. [Source: docs.python.org/3/tutorial/modules.html]
 
 Q: When does __init__.py run?
-A: When the package or any submodule is FIRST imported. Runs once per interpreter session. [Source: docs.python.org/3/reference/import.html#regular-packages]
+A: When the package is initially imported. Later submodule imports do NOT re-execute it while the package remains cached in sys.modules. [Source: docs.python.org/3/reference/import.html#regular-packages]
 
 Q: What does __all__ do in __init__.py?
-A: Defines public API for `from package import *`. Lists names to export. Also documents intended public interface. [Source: docs.python.org/3/tutorial/modules.html#importing-from-a-package]
+A: Primarily controls `from package import *` (star-import) behavior — lists which names it exports. It does NOT enforce a public API or prevent direct imports of other names. [Source: docs.python.org/3/tutorial/modules.html#importing-from-a-package]
 
 Q: Absolute vs relative imports — which to prefer?
-A: Absolute imports (PEP 8) — unambiguous, work everywhere. Relative imports only work inside packages. [Source: PEP 8 — Imports]
+A: Absolute imports (PEP 8) — unambiguous, work everywhere. Relative imports require package context (`__package__`), not merely being inside a package; a module run as a file (`python path/to/module.py`) lacks it — use `python -m package.module` instead. [Source: PEP 8 — Imports]
 
 Q: Relative import syntax?
-A: `from . import module` (same package), `from .. import module` (parent package), `from ..sub import func`. [Source: PEP 328]
+A: `from . import module` (same package), `from .. import module` (parent package), `from ..sub import func`. Run with `python -m package.module` so relative imports resolve. [Source: PEP 328]
 
 Q: What is a namespace package (PEP 420)?
 A: Package WITHOUT __init__.py — multiple directories merge into one namespace. Used for plugins, split distributions. [Source: PEP 420]
@@ -479,7 +479,7 @@ Q: How to dynamically import a module by string name?
 A: `importlib.import_module("json")` or `importlib.import_module(".module_a", package="mypackage")` for relative. [Source: docs.python.org/3/library/importlib.html#importlib.import_module]
 
 Q: How to reload a module after editing?
-A: `importlib.reload(module)` — re-executes module code, updates sys.modules. [Source: docs.python.org/3/library/importlib.html#importlib.reload]
+A: `importlib.reload(module)` — re-executes the module in its existing namespace. It does NOT refresh names already imported via `from module import name` or references held by existing instances. [Source: docs.python.org/3/library/importlib.html#importlib.reload]
 
 Q: How to load a module from a file path?
 A: `spec = importlib.util.spec_from_file_location("name", "/path/to/file.py"); module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)` [Source: docs.python.org/3/library/importlib.html#importlib.util.spec_from_file_location]
@@ -494,7 +494,7 @@ Q: What does runpy.run_module() do?
 A: Runs a module as __main__ (like `python -m module`). `runpy.run_module("mymodule", run_name="__main__")`. [Source: docs.python.org/3/library/runpy.html]
 
 Q: How does Python find modules?
-A: Searches sys.path: 1) script directory, 2) PYTHONPATH, 3) standard library, 4) site-packages. [Source: docs.python.org/3/library/sys.html#sys.path]
+A: Searches `sys.path`, whose contents vary by invocation mode, interpreter config, site initialization, .pth files, and isolated mode. Common contributors: script/`-m` directory, PYTHONPATH, standard library, site-packages. Inspect `sys.path` in the active interpreter. [Source: docs.python.org/3/library/sys.html#sys.path]
 
 Q: How to add a directory to module search path at runtime?
 A: `sys.path.insert(0, "/custom/path")` — but prefer virtual env + `pip install -e .` instead. [Source: docs.python.org/3/library/sys.html#sys.path]
@@ -503,7 +503,7 @@ Q: What's the `if __name__ == "__main__"` pattern?
 A: Code under this block only runs when file executed directly (`python file.py`), not when imported. [Source: docs.python.org/3/library/__main__.html]
 
 Q: What causes circular imports and how to fix?
-A: Module A imports B, B imports A. Fix: move import inside function (lazy), restructure, or use importlib. [Source: docs.python.org/3/faq/programming.html#what-are-the-best-practices-for-using-import-in-a-module]
+A: Module A imports B, B imports A. Primary fix: redesign the dependency graph. Lazy (function-level) imports are a tactical option; type-only imports can use `typing.TYPE_CHECKING`. `importlib` is not a general fix. [Source: docs.python.org/3/faq/programming.html#what-are-the-best-practices-for-using-import-in-a-module]
 
 Q: What's the src/ layout for packages?
 A: Package code in `src/mypackage/` — avoids accidental imports from working dir, matches installed structure. [Source: packaging.python.org/en/latest/tutorials/packaging-projects]
@@ -512,7 +512,7 @@ Q: What's pyproject.toml for?
 A: Modern packaging config (PEP 517/518/621). Defines build-system, project metadata, dependencies, optional deps. [Source: PEP 621]
 
 Q: How to install package in editable mode?
-A: `pip install -e .` — installs with symlinks, edits reflect immediately without reinstall. [Source: PEP 660]
+A: `pip install -e .` — an editable install exposes source changes without a normal reinstall. The mechanism (symlink vs .pth) depends on the installer and build backend. [Source: PEP 660]
 
 Q: What's a conditional import?
 A: `try: import ujson as json except ImportError: import json` — optional dependency with fallback. [Source: PEP 8]
