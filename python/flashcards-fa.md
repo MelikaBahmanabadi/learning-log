@@ -50,6 +50,9 @@ A: `snake_case`
 Q: نام‌گذاری کلاس‌ها PEP 8؟
 A: `PascalCase`
 
+Q: چطور آرگومان پیش‌فرض mutable رو ایمن مدیریت کنیم؟
+A: از `None` به عنوان پیش‌فرض استفاده کن و با `is None` چک کن: `def f(items=None): if items is None: items = []`
+
 Q: قانون LEGB؟
 A: Local → Enclosing → Global → Built-in — ترتیب جستجوی نام.
 
@@ -319,6 +322,12 @@ A: به محض ورود بایت‌ها به برنامه (شبکه، فایل) 
 
 Q: چطور چند whitespace رو به یکی تبدیل کنیم؟
 A: `" ".join(s.split())` — `split()` هر run whitespace رو فشرده می‌کنه، `join` با تک‌فاصله بازسازی می‌کنه.
+
+Q: چطور چند کاراکتر whitespace رو فشرده کنیم؟
+A: `" ".join(s.split())` — `split()` هر run از whitespace رو فشرده می‌کنه، `join` با تک‌فاصله بازسازی می‌کنه.
+
+Q: فرق `str.casefold()` و `str.lower()` برای حرف i ترکی؟
+A: هر دو locale-independent هستن، اما `casefold()` نسخه قوی‌تر و Unicode-aware برای تطبیق بدون حساسیت به بزرگی/کوچکی حروفه — برای مقایسه با `==` ترجیح داده می‌شه.
 
 ---
 
